@@ -230,7 +230,7 @@ public class PunManager : MonoBehaviourPunCallbacks
     /// <param name="other"></param>
     public override void OnPlayerLeftRoom(Player other)
     {
-        DebugLogger.SendDebug("GameManager : OnPlayerLeftRoom()" + other.NickName);
+        DebugLogger.SendDebug("GameManager : OnPlayerLeftRoom() target > " + other.NickName);
 
         if (PhotonNetwork.IsMasterClient)
         {

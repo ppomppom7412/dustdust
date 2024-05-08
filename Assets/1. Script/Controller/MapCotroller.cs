@@ -6,6 +6,7 @@ using System;
 
 public class MapCotroller : MonoSingleton<MapCotroller>
 {
+    public GameObject mapPrant;
     public List<MapSlot> allSlot; //lowerleft sort, 유니티와 비슷한 좌표구성
     List<MapSlot> activeSlots;
     int callIndex = 0; //부른 위치 임시저장
@@ -19,7 +20,7 @@ public class MapCotroller : MonoSingleton<MapCotroller>
         allSlot ??= new List<MapSlot>();
         activeSlots ??= new List<MapSlot>();
 
-        for (int i = 0; i > allSlot.Count; ++i) 
+        for (int i = 0; i < allSlot.Count; ++i) 
         {
             if (allSlot == null) continue;
 
@@ -121,7 +122,7 @@ public class MapCotroller : MonoSingleton<MapCotroller>
                 for (int x = -1; x < 2; ++x) {
                     for (int y = -1; y < 2; ++y){
                         if (x == 0 && y == 0) continue;
-                        MapSlot getslot3 = ExistTargetSlot(GetMapPoint(target_point.x + x, target_point.y + y));
+                        MapSlot getslot3 = ExistTargetSlot(new Vector2(target_point.x + x, target_point.y + y));
 
                         if (getslot3 == null) continue;
 
@@ -131,11 +132,11 @@ public class MapCotroller : MonoSingleton<MapCotroller>
                 }
                 break;
 
-            case SlotShape.Around3:
+            case SlotShape.Around2:
                 for (int x = -2; x < 3; ++x){
                     for (int y = -2; y < 3; ++y){
                         if (x == 0 && y == 0) continue;
-                        MapSlot getslot4 = ExistTargetSlot(GetMapPoint(target_point.x + x, target_point.y + y));
+                        MapSlot getslot4 = ExistTargetSlot(new Vector2(target_point.x + x, target_point.y + y));
 
                         if (getslot4 == null) continue;
 
@@ -144,11 +145,11 @@ public class MapCotroller : MonoSingleton<MapCotroller>
                     }
                 }
                 break;
-            case SlotShape.Around2:
+            case SlotShape.Around3:
                 for (int x = -3; x < 4; ++x){
                     for (int y = -3; y < 4; ++y){
                         if (x == 0 && y == 0) continue;
-                        MapSlot getslot5 = ExistTargetSlot(GetMapPoint(target_point.x + x, target_point.y + y));
+                        MapSlot getslot5 = ExistTargetSlot(new Vector2(target_point.x + x, target_point.y + y));
 
                         if (getslot5 == null) continue;
 

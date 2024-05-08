@@ -48,12 +48,12 @@ public class PlayerController : MonoBehaviourPunCallbacks//, IPunObservable
 
         if (isMe)
         {
-            //랜덤 위치 지정
-            SendChange(1, Random.Range(0, MapCotroller.mapSizeX * MapCotroller.mapSizeY-1));
-
             //프리팹 외형 아무거나 세팅하기
             //나중엔 로비에서 세팅한 값으로 보내는 것으로 하기
             SendCustom(((CharacterBuilder.PresetList)(Random.Range(1, 17))).ToString());
+
+            //랜덤 위치 지정
+            SendChange(0, Random.Range(0, MapCotroller.mapSizeX * MapCotroller.mapSizeY - 1));
         }
     }
 
@@ -130,7 +130,7 @@ public class PlayerController : MonoBehaviourPunCallbacks//, IPunObservable
     /// <param name="value"></param>
     public void SendCustom(string value = "")
     {
-        DebugLogger.SendDebug("PlayerController : SendCharacter");
+        DebugLogger.SendDebug("PlayerController : SendCharacter "+value);
         PV.RPC("ReceivedCharacter", RpcTarget.All, value);
     }
 
@@ -141,36 +141,46 @@ public class PlayerController : MonoBehaviourPunCallbacks//, IPunObservable
     /// <param name="value"></param>
     public void SendChange(int id, int value = 0)
     {
-        //if (id.Equals(0))
-        //{
-        //    DebugLogger.SendDebug("PlayerController : SendCharacter");
-        //    PV.RPC("ReceivedCharacter", RpcTarget.All, value);
-        //}
+        DebugLogger.SendDebug("SendChange ("+id+"):"+value + " / turn: "+ GameManager.Instance.currTurn);
 
         //내 턴이 아니라면 진행하지 않는다. (준비단계인 -1일땐 뭐든 받음)
-        if (GameManager.Instance.currTurn.Equals(-1) && !GameManager.Instance.currTurn.Equals(GameManager.Instance.myTurn))
-            return;
+        if (GameManager.Instance.currTurn != -1) 
+        {
+            if (GameManager.Instance.currTurn != GameManager.Instance.myTurn) 
+                return;
+        }
 
         if (id.Equals(-1))//턴넘김
         {
-            //DebugLogger.SendDebug("PlayerController : SendPosition");
-            //PV.RPC("ReceivedPosition", RpcTarget.All, value);
+            DebugLogger.SendDebug("PlayerController : NextTurn");
+            PV.RPC("ReceivedNextTurn", RpcTarget.All);
         }
         else if (id.Equals(0))//이동
         {
-            DebugLogger.SendDebug("PlayerController : SendPosition");
+            DebugLogger.SendDebug("PlayerController : SendPosition "+value);
             PV.RPC("ReceivedPosition", RpcTarget.All, value);
         }
         else if (id.Equals(1))//공격
         {
-            DebugLogger.SendDebug("PlayerController : SendAttack");
+            DebugLogger.SendDebug("PlayerController : SendAttack "+value);
             PV.RPC("ReceivedAttack", RpcTarget.All, value);
         }
         else if (id.Equals(2))//스킬
         {
-            DebugLogger.SendDebug("PlayerController : SendSkill");
+            DebugLogger.SendDebug("PlayerController : SendSkill " + value);
             PV.RPC("ReceivedSkill", RpcTarget.All, value);
         }
+    }
+
+    [PunRPC]
+    /// <summary>
+    /// 다음 턴으로 넘기기
+    /// </summary>
+    public void ReceivedNextTurn()
+    {
+        //if (photonView.IsMine) return;
+
+        GameManager.Instance.NextTurn();
     }
 
     [PunRPC]
@@ -181,12 +191,12 @@ public class PlayerController : MonoBehaviourPunCallbacks//, IPunObservable
     {
         //if (photonView.IsMine) return;
 
-        DebugLogger.SendDebug("PlayerController : ReceivedCharacter");
-
         //캐릭터 빌더에 의해 변경하기
         charBuilder.RebuildToString(value);
 
         UpdatePlayer();
+
+        GameManager.Instance.AddReadyCount();
     }
 
     [PunRPC]
@@ -197,9 +207,10 @@ public class PlayerController : MonoBehaviourPunCallbacks//, IPunObservable
     {
         //if (photonView.IsMine) return;
 
-        DebugLogger.SendDebug("PlayerController : RecivedPosition");
         SetPosition(index);
         UpdatePlayer();
+
+        GameManager.Instance.AddReadyCount();
     }
 
     [PunRPC]
@@ -210,7 +221,6 @@ public class PlayerController : MonoBehaviourPunCallbacks//, IPunObservable
     {
         //if (photonView.IsMine) return;
 
-        DebugLogger.SendDebug("PlayerController : RecivedAttack");
         //SetPosition(index);
         UpdatePlayer();
     }
@@ -223,7 +233,6 @@ public class PlayerController : MonoBehaviourPunCallbacks//, IPunObservable
     {
         //if (photonView.IsMine) return;
 
-        DebugLogger.SendDebug("PlayerController : RecivedSkill");
         //SetPosition(index);
         UpdatePlayer();
     }

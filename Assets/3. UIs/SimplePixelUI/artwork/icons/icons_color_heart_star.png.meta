@@ -120,12 +120,12 @@ TextureImporter:
       name: icons_color_heart_star_0
       rect:
         serializedVersion: 2
-        x: 4
-        y: 55
+        x: 3
+        y: 57
         width: 18
         height: 17
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -141,12 +141,12 @@ TextureImporter:
       name: icons_color_heart_star_1
       rect:
         serializedVersion: 2
-        x: 29
-        y: 56
+        x: 25
+        y: 58
         width: 16
         height: 15
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -162,12 +162,12 @@ TextureImporter:
       name: icons_color_heart_star_2
       rect:
         serializedVersion: 2
-        x: 50
-        y: 61
-        width: 9
-        height: 8
+        x: 45
+        y: 58
+        width: 12
+        height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -183,12 +183,12 @@ TextureImporter:
       name: icons_color_heart_star_3
       rect:
         serializedVersion: 2
-        x: 64
-        y: 62
-        width: 7
-        height: 6
+        x: 62
+        y: 59
+        width: 10
+        height: 14
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -204,12 +204,12 @@ TextureImporter:
       name: icons_color_heart_star_4
       rect:
         serializedVersion: 2
-        x: 8
-        y: 46
-        width: 10
-        height: 6
+        x: 3
+        y: 39
+        width: 18
+        height: 15
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -225,12 +225,12 @@ TextureImporter:
       name: icons_color_heart_star_5
       rect:
         serializedVersion: 2
-        x: 33
-        y: 48
-        width: 8
-        height: 4
+        x: 24
+        y: 40
+        width: 16
+        height: 13
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -246,12 +246,12 @@ TextureImporter:
       name: icons_color_heart_star_6
       rect:
         serializedVersion: 2
-        x: 48
-        y: 46
-        width: 11
+        x: 43
+        y: 47
+        width: 9
         height: 8
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -267,12 +267,12 @@ TextureImporter:
       name: icons_color_heart_star_7
       rect:
         serializedVersion: 2
-        x: 63
-        y: 46
-        width: 9
+        x: 56
+        y: 48
+        width: 7
         height: 6
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -288,12 +288,12 @@ TextureImporter:
       name: icons_color_heart_star_8
       rect:
         serializedVersion: 2
-        x: 4
-        y: 28
-        width: 18
-        height: 15
+        x: 67
+        y: 48
+        width: 6
+        height: 6
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -309,12 +309,12 @@ TextureImporter:
       name: icons_color_heart_star_9
       rect:
         serializedVersion: 2
-        x: 29
-        y: 28
-        width: 16
-        height: 13
+        x: 43
+        y: 38
+        width: 10
+        height: 6
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -330,12 +330,12 @@ TextureImporter:
       name: icons_color_heart_star_10
       rect:
         serializedVersion: 2
-        x: 8
-        y: 6
-        width: 12
-        height: 16
+        x: 56
+        y: 39
+        width: 8
+        height: 4
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -351,12 +351,12 @@ TextureImporter:
       name: icons_color_heart_star_11
       rect:
         serializedVersion: 2
-        x: 29
-        y: 7
-        width: 10
-        height: 14
+        x: 3
+        y: 24
+        width: 12
+        height: 12
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -364,6 +364,237 @@ TextureImporter:
       bones: []
       spriteID: 7bc50e8e82cdd554ea6cff487887fa4e
       internalID: -1402317934
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icons_color_heart_star_12
+      rect:
+        serializedVersion: 2
+        x: 19
+        y: 25
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b080c5d2708858a47b3c7c9f1d68f433
+      internalID: 1686789378
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icons_color_heart_star_13
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 25
+        width: 11
+        height: 8
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2132f8f72d8af9048b553d4fd1f23bac
+      internalID: 1037128445
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icons_color_heart_star_14
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 26
+        width: 9
+        height: 6
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e68a8a4b2e13b7c4f990f70bd6fd393a
+      internalID: -18961710
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icons_color_heart_star_15
+      rect:
+        serializedVersion: 2
+        x: 60
+        y: 24
+        width: 11
+        height: 11
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 42f92378ea5ba314c932c64ba5c6936a
+      internalID: 1631414412
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icons_color_heart_star_16
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 11
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b199dab0935853b4ca3744b85184d90d
+      internalID: 2140498703
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icons_color_heart_star_17
+      rect:
+        serializedVersion: 2
+        x: 14
+        y: 12
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 42fb8dd99225b3047a96ad0a036c904c
+      internalID: -426657578
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icons_color_heart_star_18
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 11
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 44af1293ba18ac9458c9ed6db60be07b
+      internalID: 1113055285
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icons_color_heart_star_19
+      rect:
+        serializedVersion: 2
+        x: 35
+        y: 13
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3dc73cb33ecd5084a902e464d6a488af
+      internalID: -530101589
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icons_color_heart_star_20
+      rect:
+        serializedVersion: 2
+        x: 45
+        y: 11
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4e2f98e43bef26242958cd72067c1156
+      internalID: -1339910603
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icons_color_heart_star_21
+      rect:
+        serializedVersion: 2
+        x: 57
+        y: 12
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2d8a21588d714604b8680076deb48929
+      internalID: 164533024
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: icons_color_heart_star_22
+      rect:
+        serializedVersion: 2
+        x: 67
+        y: 40
+        width: 6
+        height: 2
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8fcb030160a100f49891b69b7408ef31
+      internalID: -291643516
       vertices: []
       indices: 
       edges: []
@@ -383,7 +614,18 @@ TextureImporter:
       icons_color_heart_star_1: 2126740214
       icons_color_heart_star_10: 879282023
       icons_color_heart_star_11: -1402317934
+      icons_color_heart_star_12: 1686789378
+      icons_color_heart_star_13: 1037128445
+      icons_color_heart_star_14: -18961710
+      icons_color_heart_star_15: 1631414412
+      icons_color_heart_star_16: 2140498703
+      icons_color_heart_star_17: -426657578
+      icons_color_heart_star_18: 1113055285
+      icons_color_heart_star_19: -530101589
       icons_color_heart_star_2: -2131578870
+      icons_color_heart_star_20: -1339910603
+      icons_color_heart_star_21: 164533024
+      icons_color_heart_star_22: -291643516
       icons_color_heart_star_3: -1285215854
       icons_color_heart_star_4: 850318400
       icons_color_heart_star_5: -1499174998

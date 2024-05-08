@@ -7,6 +7,8 @@ using Photon.Pun;
 
 public class GameManager : MonoSingleton<GameManager>
 {
+    public enum TurnIndex {Skip = -1, Move, Attack, Skill }
+
     //플레이어 전용 프리팹
     public GameObject playerPrefab;
     public GameObject playerOb;
@@ -15,7 +17,8 @@ public class GameManager : MonoSingleton<GameManager>
     public int myTurn = 0;
     public int actionIndex = 0;
     const int maxTurn = 2;
-    const float waittime = 15f;
+    int readycount = 0;
+    public const int waittime = 20;
     IEnumerator countDownCrtn;
 
     public UnityEngine.Events.UnityEvent ChangeTurn;
@@ -37,7 +40,11 @@ public class GameManager : MonoSingleton<GameManager>
     {
         UIGameManager.Instance.OpenIngamePanel();
 
-        CreatePlayerPrefab();
+        if (PlayerController.LocalInstance == null)
+        {
+            // Debug.LogFormat("We are Instantiating LocalPlayer from {0}", SceneManagerHelper.ActiveSceneName);
+            playerOb = PhotonNetwork.Instantiate(this.playerPrefab.name, new Vector3(0f, 0f, 0f), Quaternion.identity, 0);
+        }
 
         currTurn = -1;
         actionIndex = 0;
@@ -52,21 +59,16 @@ public class GameManager : MonoSingleton<GameManager>
         //닉네임 설정하기
         UIGameManager.Instance.SetNicknameText();
 
-        //게임 시작
-        Invoke("NextTurn", 0.5f);
+        readycount = 0;
     }
 
     /// <summary>
-    /// 플레이어 프리팹 만들기
+    /// 모든 플레이어 세팅이 끝날 때
     /// </summary>
-    public void CreatePlayerPrefab()
+    public void AddReadyCount() 
     {
-        if (PlayerController.LocalInstance == null)
-        {
-            // Debug.LogFormat("We are Instantiating LocalPlayer from {0}", SceneManagerHelper.ActiveSceneName);
-            playerOb = PhotonNetwork.Instantiate(this.playerPrefab.name, new Vector3(0f, 0f, 0f), Quaternion.identity, 0);
-            playerOb.transform.parent = MapCotroller.Instance.transform;
-        }
+        if (currTurn  < 0 && ++readycount >= 4)
+            NextTurn();
     }
 
     /// <summary>
@@ -84,6 +86,12 @@ public class GameManager : MonoSingleton<GameManager>
     /// </summary>
     public void NextTurn()
     {
+        //공격시 들어났던 캐릭터를 숨겨주고
+        //그림자를 남겨 1부터 시작하게 해준다.
+
+        //모든 버튼 비활성화
+        MapCotroller.Instance.OffAllSlot();
+
         //카운트 다운 비활성화
         if (countDownCrtn != null)
             StopCoroutine(countDownCrtn);
@@ -96,7 +104,9 @@ public class GameManager : MonoSingleton<GameManager>
 
         ChangeTurn.Invoke();
 
-        Invoke("NextAction", 0.5f);
+        //카운트 다운 활성화 및 액션 실행
+        countDownCrtn = NextCountDown(waittime);
+        StartCoroutine(countDownCrtn);
     }
 
     /// <summary>
@@ -104,19 +114,13 @@ public class GameManager : MonoSingleton<GameManager>
     /// </summary>
     public void NextAction()
     {
-        if (actionIndex.Equals(0))
-        {
-            //카운트 다운 활성화
-            countDownCrtn = NextCountDown(waittime);
-            StartCoroutine(countDownCrtn);
-        }
+        //내 턴과 현재 턴 동일할 경우 진행하기
+        if (!currTurn.Equals(myTurn)) return;
 
-        // 0과 1만 반복하는 나머지
-        //내 턴과 현재 턴의 나머지값이 동일할 경우 진행하기
-        if (currTurn % 2 != myTurn) return;
-        
+        UIGameManager.Instance.ShowActionIcon(actionIndex);
+
         //넘기기버튼 활성화
-            switch (actionIndex) 
+        switch (actionIndex) 
             {
                 case 0://이동
                 //내 위치 기준으로 버튼 열기
@@ -125,13 +129,13 @@ public class GameManager : MonoSingleton<GameManager>
 
                 case 1://공격
                 //내 위치 빼고 전체 버튼 열기
-                MapCotroller.Instance.OnSlots(PlayerController.LocalInstance.curpos, MapCotroller.SlotShape.NotTarget);
-                break;
+                MapCotroller.Instance.OnSlots(PlayerController.LocalInstance.curpos, MapCotroller.SlotShape.All);
+                    break;
 
                 case 2://스킬                
                 //가진 스킬을 기반으로 사용여부 체크
                 MapCotroller.Instance.OnSlots(PlayerController.LocalInstance.curpos, MapCotroller.SlotShape.Random);
-                break;
+                    break;
             }
         
     }
@@ -142,11 +146,15 @@ public class GameManager : MonoSingleton<GameManager>
     /// <param name="value"></param>
     public void Action(int value) 
     {
-        // 0과 1만 반복하는 나머지
-        //내 턴과 현재 턴의 나머지값이 동일할 경우 진행하기
-        if (currTurn % 2 != myTurn) return;
+        //내 턴과 현재 턴 동일할 경우 진행하기
+        if (!currTurn.Equals(myTurn)) return;
 
-        if (actionIndex.Equals(2))
+        if (value.Equals(-1))
+        {
+            //턴 넘기기
+            PlayerController.LocalInstance.SendChange(-1);
+        }
+        else if (actionIndex.Equals(2))
         {
             //스킬 구현
         }
@@ -163,14 +171,37 @@ public class GameManager : MonoSingleton<GameManager>
     /// <returns></returns>
     IEnumerator NextCountDown(float time) 
     {
-        WaitForSeconds wait1f = new WaitForSeconds(1f);
+        WaitForSeconds wait01f = new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.5f);
 
-        while (time > 0) 
+        //UIGameManager.Instance.myTurnUI.StartCount(waittime);
+
+        //내 턴과 현재 턴 동일할 경우 진행하기
+        if (currTurn.Equals(myTurn))
         {
-            //UI로 시간초 지남을 보여주기
-            yield return wait1f;
+            UIGameManager.Instance.skipButton.SetActive(true);
+            NextAction();
         }
 
+        //before
+        //yield return new WaitForSeconds(time);
+
+        //after
+        UIGameManager.Instance.gameObject.SetActive(true);
+        for (int i = 0; i <= time * 10; ++i) 
+        {
+            //1초마다 변경
+            if (i % 10 == 0)
+                UIGameManager.Instance.myTurnUI.SetTimeText(time-(i/10f));
+
+            UIGameManager.Instance.myTurnUI.SetFillValue((i+0.01f)/(time*10));
+
+            yield return wait01f;
+        }
+
+        UIGameManager.Instance.gameObject.SetActive(false);
+
+        //액션에 관련되어 열린 창 닫기
         //시간초 지나면 턴 넘기기
         NextTurn();
     }

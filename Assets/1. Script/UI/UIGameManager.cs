@@ -22,9 +22,10 @@ public class UIGameManager : MonoSingleton<UIGameManager>
     public GameObject IngamePanel;
     public UserNameUI userCardMe;//나
     public UserNameUI userCardOther;//상대
-
     public ShadowCountUI shadowTargetUI;//별도로 작동하는 UI 재구성하기
-    public GameObject myTurnOb;
+    public CountDownUI myTurnUI;
+    public GameObject skipButton;
+    public GameObject[] actIcons;
 
     #region MonoBehaviour func
 
@@ -54,7 +55,7 @@ public class UIGameManager : MonoSingleton<UIGameManager>
         IngamePanel.SetActive(false);
         lobbyPanel.SetActive(true);
 
-        MapCotroller.Instance.gameObject.SetActive(false);
+        MapCotroller.Instance.mapPrant.SetActive(false);
 
         //초기 세팅하기
         SetStartButton(true);
@@ -148,7 +149,10 @@ public class UIGameManager : MonoSingleton<UIGameManager>
         lobbyPanel.SetActive(false);
         IngamePanel.SetActive(true);
 
-        MapCotroller.Instance.gameObject.SetActive(true);
+        MapCotroller.Instance.mapPrant.SetActive(true);
+        skipButton.SetActive(false);
+        myTurnUI.gameObject.SetActive(false);
+        ShowActionIcon(-1);
     }
 
     /// <summary>
@@ -172,9 +176,11 @@ public class UIGameManager : MonoSingleton<UIGameManager>
     /// </summary>
     public void UpdateTurnImage() 
     {
+        skipButton.SetActive(false);
+        ShowActionIcon(-1);
+
         if (GameManager.Instance.currTurn.Equals(GameManager.Instance.myTurn))
         {
-            myTurnOb.SetActive(true);
             userCardMe.SetTurn(true);
             userCardOther.SetTurn(false);
         }
@@ -182,6 +188,21 @@ public class UIGameManager : MonoSingleton<UIGameManager>
         {
             userCardMe.SetTurn(false);
             userCardOther.SetTurn(true);
+        }
+    }
+
+    /// <summary>
+    /// 현재 액션에 대한 표기
+    /// </summary>
+    /// <param name="act"></param>
+    public void ShowActionIcon(int act)
+    {
+        for (int i = 0; i < actIcons.Length; ++i) 
+        {
+            if (act.Equals(i))
+                actIcons[i].SetActive(true);
+            else
+                actIcons[i].SetActive(false);
         }
     }
 
