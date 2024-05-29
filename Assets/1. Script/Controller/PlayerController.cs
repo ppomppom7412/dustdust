@@ -44,17 +44,6 @@ public class PlayerController : MonoBehaviourPunCallbacks//, IPunObservable
             isMe = false;
 
         meMarker.SetActive(isMe);
-        curpos = Vector2.zero;
-
-        if (isMe)
-        {
-            //프리팹 외형 아무거나 세팅하기
-            //나중엔 로비에서 세팅한 값으로 보내는 것으로 하기
-            SendCustom(((CharacterBuilder.PresetList)(Random.Range(1, 17))).ToString());
-
-            //랜덤 위치 지정
-            SendChange(0, Random.Range(0, MapCotroller.mapSizeX * MapCotroller.mapSizeY - 1));
-        }
     }
 
     //private void Update()
@@ -106,7 +95,7 @@ public class PlayerController : MonoBehaviourPunCallbacks//, IPunObservable
     /// </summary>
     void UpdatePlayer()
     {
-        gameObject.transform.position = curpos * 2f;
+
     }
 
     public void SetPosition(int index)
@@ -152,7 +141,7 @@ public class PlayerController : MonoBehaviourPunCallbacks//, IPunObservable
 
         if (id.Equals(-1))//턴넘김
         {
-            DebugLogger.SendDebug("PlayerController : NextTurn");
+            DebugLogger.SendDebug("PlayerController : NextTurn" + GameManager.Instance.currTurn+1);
             PV.RPC("ReceivedNextTurn", RpcTarget.All);
         }
         else if (id.Equals(0))//이동

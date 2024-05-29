@@ -47,7 +47,7 @@ public class GameManager : MonoSingleton<GameManager>
         }
 
         currTurn = -1;
-        actionIndex = 0;
+        actionIndex = -1;
 
         //나의 턴 순서 찾기
         for (int i = 0; i < PunManager.Instance.curPlayers.Count; ++i)
@@ -60,6 +60,24 @@ public class GameManager : MonoSingleton<GameManager>
         UIGameManager.Instance.SetNicknameText();
 
         readycount = 0;
+
+        //약간의 딜레이를 감수하는 만들기
+        StartCoroutine(SetupStart());
+        
+    }
+
+    //준비 후에 시작
+    IEnumerator SetupStart() 
+    {
+        yield return new WaitForSeconds(0.8f);
+
+        //프리팹 외형 아무거나 세팅하기
+        //나중엔 로비에서 세팅한 값으로 보내는 것으로 하기
+        PlayerController.LocalInstance.SendCustom(((Assets.PixelFantasy.PixelHeroes.Common.Scripts.CharacterScripts.CharacterBuilder.PresetList)(Random.Range(1, 17))).ToString());
+
+        //랜덤 위치 지정
+        PlayerController.LocalInstance.SendChange(0, Random.Range(0, MapCotroller.mapSizeX * MapCotroller.mapSizeY - 1));
+
     }
 
     /// <summary>
@@ -67,8 +85,12 @@ public class GameManager : MonoSingleton<GameManager>
     /// </summary>
     public void AddReadyCount() 
     {
-        if (currTurn  < 0 && ++readycount >= 4)
-            NextTurn();
+        if (currTurn < 0 && ++readycount >= 4)
+        {
+            //턴 넘기기
+            if (myTurn.Equals(0))
+                PlayerController.LocalInstance.SendChange(-1);
+        }
     }
 
     /// <summary>
@@ -97,7 +119,7 @@ public class GameManager : MonoSingleton<GameManager>
             StopCoroutine(countDownCrtn);
 
         currTurn += 1;
-        actionIndex = 0;
+        actionIndex = -1;
 
         if (currTurn >= maxTurn)
             currTurn = 0;
@@ -117,7 +139,9 @@ public class GameManager : MonoSingleton<GameManager>
         //내 턴과 현재 턴 동일할 경우 진행하기
         if (!currTurn.Equals(myTurn)) return;
 
-        UIGameManager.Instance.ShowActionIcon(actionIndex);
+        UIGameManager.Instance.ShowActionIcon(++actionIndex);
+
+        Debug.Log("[On Action] "+actionIndex);
 
         //넘기기버튼 활성화
         switch (actionIndex) 
@@ -161,6 +185,7 @@ public class GameManager : MonoSingleton<GameManager>
         else 
         {
             PlayerController.LocalInstance.SendChange(actionIndex, value);
+            NextAction();
         }
     }
 
@@ -187,23 +212,22 @@ public class GameManager : MonoSingleton<GameManager>
         //yield return new WaitForSeconds(time);
 
         //after
-        UIGameManager.Instance.gameObject.SetActive(true);
+        UIGameManager.Instance.countDwUI.gameObject.SetActive(true);
         for (int i = 0; i <= time * 10; ++i) 
         {
             //1초마다 변경
             if (i % 10 == 0)
-                UIGameManager.Instance.myTurnUI.SetTimeText(time-(i/10f));
+                UIGameManager.Instance.countDwUI.SetTimeText(time-(i/10f));
 
-            UIGameManager.Instance.myTurnUI.SetFillValue((i+0.01f)/(time*10));
+            UIGameManager.Instance.countDwUI.SetFillValue((i+0.01f)/(time*10));
 
             yield return wait01f;
         }
-
-        UIGameManager.Instance.gameObject.SetActive(false);
+        UIGameManager.Instance.countDwUI.gameObject.SetActive(false);
 
         //액션에 관련되어 열린 창 닫기
         //시간초 지나면 턴 넘기기
-        NextTurn();
+        Action(-1);
     }
 
 }

@@ -23,8 +23,9 @@ public class UIGameManager : MonoSingleton<UIGameManager>
     public UserNameUI userCardMe;//나
     public UserNameUI userCardOther;//상대
     public ShadowCountUI shadowTargetUI;//별도로 작동하는 UI 재구성하기
-    public CountDownUI myTurnUI;
+    public CountDownUI countDwUI;
     public GameObject skipButton;
+    public GameObject myTurnUI;
     public GameObject[] actIcons;
 
     #region MonoBehaviour func
@@ -151,7 +152,8 @@ public class UIGameManager : MonoSingleton<UIGameManager>
 
         MapCotroller.Instance.mapPrant.SetActive(true);
         skipButton.SetActive(false);
-        myTurnUI.gameObject.SetActive(false);
+        myTurnUI.SetActive(false);
+        countDwUI.gameObject.SetActive(false);
         ShowActionIcon(-1);
     }
 
@@ -181,6 +183,7 @@ public class UIGameManager : MonoSingleton<UIGameManager>
 
         if (GameManager.Instance.currTurn.Equals(GameManager.Instance.myTurn))
         {
+            myTurnUI.SetActive(true);
             userCardMe.SetTurn(true);
             userCardOther.SetTurn(false);
         }
