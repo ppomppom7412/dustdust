@@ -19,7 +19,6 @@ public class GameManager : MonoSingleton<GameManager>
     const int maxTurn = 2;
     int readycount = 0;
     public const int waittime = 20;
-    IEnumerator countDownCrtn;
 
     public UnityEngine.Events.UnityEvent ChangeTurn;
 
@@ -60,24 +59,6 @@ public class GameManager : MonoSingleton<GameManager>
         UIGameManager.Instance.SetNicknameText();
 
         readycount = 0;
-
-        //약간의 딜레이를 감수하는 만들기
-        StartCoroutine(SetupStart());
-        
-    }
-
-    //준비 후에 시작
-    IEnumerator SetupStart() 
-    {
-        yield return new WaitForSeconds(0.8f);
-
-        //프리팹 외형 아무거나 세팅하기
-        //나중엔 로비에서 세팅한 값으로 보내는 것으로 하기
-        PlayerController.LocalInstance.SendCustom(((Assets.PixelFantasy.PixelHeroes.Common.Scripts.CharacterScripts.CharacterBuilder.PresetList)(Random.Range(1, 17))).ToString());
-
-        //랜덤 위치 지정
-        PlayerController.LocalInstance.SendChange(0, Random.Range(0, MapCotroller.mapSizeX * MapCotroller.mapSizeY - 1));
-
     }
 
     /// <summary>
@@ -90,6 +71,9 @@ public class GameManager : MonoSingleton<GameManager>
             //턴 넘기기
             if (myTurn.Equals(0))
                 PlayerController.LocalInstance.SendChange(-1);
+
+            //가려놨던 캐릭터 표기하기
+            PlayerController.LocalInstance.charBuilder.SetAlphaValue(1f);
         }
     }
 
@@ -114,10 +98,6 @@ public class GameManager : MonoSingleton<GameManager>
         //모든 버튼 비활성화
         MapCotroller.Instance.OffAllSlot();
 
-        //카운트 다운 비활성화
-        if (countDownCrtn != null)
-            StopCoroutine(countDownCrtn);
-
         currTurn += 1;
         actionIndex = -1;
 
@@ -126,9 +106,12 @@ public class GameManager : MonoSingleton<GameManager>
 
         ChangeTurn.Invoke();
 
-        //카운트 다운 활성화 및 액션 실행
-        countDownCrtn = NextCountDown(waittime);
-        StartCoroutine(countDownCrtn);
+        //내 턴과 현재 턴 동일할 경우 진행하기
+        if (currTurn.Equals(myTurn))
+        {
+            UIGameManager.Instance.skipButton.SetActive(true);
+            NextAction();
+        }
     }
 
     /// <summary>
@@ -187,47 +170,6 @@ public class GameManager : MonoSingleton<GameManager>
             PlayerController.LocalInstance.SendChange(actionIndex, value);
             NextAction();
         }
-    }
-
-    /// <summary>
-    /// 남은 시간 카운트 다운
-    /// </summary>
-    /// <param name="time"></param>
-    /// <returns></returns>
-    IEnumerator NextCountDown(float time) 
-    {
-        WaitForSeconds wait01f = new WaitForSeconds(0.1f);
-        yield return new WaitForSeconds(0.5f);
-
-        //UIGameManager.Instance.myTurnUI.StartCount(waittime);
-
-        //내 턴과 현재 턴 동일할 경우 진행하기
-        if (currTurn.Equals(myTurn))
-        {
-            UIGameManager.Instance.skipButton.SetActive(true);
-            NextAction();
-        }
-
-        //before
-        //yield return new WaitForSeconds(time);
-
-        //after
-        UIGameManager.Instance.countDwUI.gameObject.SetActive(true);
-        for (int i = 0; i <= time * 10; ++i) 
-        {
-            //1초마다 변경
-            if (i % 10 == 0)
-                UIGameManager.Instance.countDwUI.SetTimeText(time-(i/10f));
-
-            UIGameManager.Instance.countDwUI.SetFillValue((i+0.01f)/(time*10));
-
-            yield return wait01f;
-        }
-        UIGameManager.Instance.countDwUI.gameObject.SetActive(false);
-
-        //액션에 관련되어 열린 창 닫기
-        //시간초 지나면 턴 넘기기
-        Action(-1);
     }
 
 }

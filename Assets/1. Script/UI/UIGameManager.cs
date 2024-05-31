@@ -30,7 +30,6 @@ public class UIGameManager : MonoSingleton<UIGameManager>
 
     #region MonoBehaviour func
 
-
     private void Start()
     {
         //턴 변경시의 이벤트 등록
@@ -155,6 +154,9 @@ public class UIGameManager : MonoSingleton<UIGameManager>
         myTurnUI.SetActive(false);
         countDwUI.gameObject.SetActive(false);
         ShowActionIcon(-1);
+
+        userCardMe.InitState();
+        userCardOther.InitState();
     }
 
     /// <summary>
@@ -192,6 +194,9 @@ public class UIGameManager : MonoSingleton<UIGameManager>
             userCardMe.SetTurn(false);
             userCardOther.SetTurn(true);
         }
+
+        //행동 제어 시간 + 시간초과시 행동 넘김
+        countDwUI.StartTimer(GameManager.waittime);
     }
 
     /// <summary>

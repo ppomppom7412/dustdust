@@ -2,23 +2,27 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
 using Photon.Pun;
-using Assets.PixelFantasy.PixelHeroes.Common.Scripts.CharacterScripts;
 
-public class PlayerController : MonoBehaviourPunCallbacks//, IPunObservable
+using Assets.PixelFantasy.PixelHeroes.Common.Scripts.CharacterScripts;
+using Assets.PixelFantasy.PixelHeroes.Common.Scripts.ExampleScripts;
+
+public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
 {
     //본인 오브젝트 확인용
     public static PlayerController LocalInstance;
     public PhotonView PV; //이벤트 송수신 //이거 없인 생성이 안됨 ㅠ
+    public PlayerController[] players;
 
     [Header("data")]
     public bool isMe = false;
-    public Vector2 curpos;
+    public int curpos;
     public int myCharID = 0;
+    public bool isOpen = false;
+    public PlayerState state;
 
     [Header("Object")]
-    public Character playerchar;
+    public CharacterAnimation playerAnim;
     public CharacterBuilder charBuilder;
     public GameObject meMarker;
 
@@ -34,9 +38,11 @@ public class PlayerController : MonoBehaviourPunCallbacks//, IPunObservable
 
         if (PV == null)
             PV = gameObject.AddComponent<PhotonView>();
+
+        state = new PlayerState();
     }
 
-    void Start()
+    public override void OnEnable()
     {
         if (LocalInstance == this)
             isMe = true;
@@ -44,15 +50,14 @@ public class PlayerController : MonoBehaviourPunCallbacks//, IPunObservable
             isMe = false;
 
         meMarker.SetActive(isMe);
-    }
 
-    //private void Update()
-    //{
-    //    if (photonView.IsMine == false && PhotonNetwork.IsConnected == true)
-    //    {
-    //        return;
-    //    }
-    //}
+        //셋업 전까진 안보이게 하자
+        charBuilder.SetAlphaValue(0);
+
+        state.Init();
+
+        StartCoroutine(StartSetup());
+    }
 
     #endregion
 
@@ -91,21 +96,38 @@ public class PlayerController : MonoBehaviourPunCallbacks//, IPunObservable
     #region main func
 
     /// <summary>
+    /// 시작을 위한 준비
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator StartSetup()
+    {
+        yield return new WaitForSeconds(0.8f);
+
+        //프리팹 외형 아무거나 세팅하기
+        //나중엔 로비에서 세팅한 값으로 보내는 것으로 하기
+        SendCustom(((CharacterBuilder.PresetList)(Random.Range(1, 17))).ToString());
+
+        //랜덤 위치 지정
+        SendChange(0, Random.Range(0, MapCotroller.mapSizeX * MapCotroller.mapSizeY - 1));
+
+        //플레이어를 모두 담아준다.
+        players = FindObjectsOfType<PlayerController>();
+
+    }
+
+    /// <summary>
     /// 서버에서 보낸 것을 기반으로 변경한다.
     /// </summary>
     void UpdatePlayer()
     {
-
-    }
-
-    public void SetPosition(int index)
-    {
-        curpos = MapCotroller.GetMapPoint(0, index);
-
-        MapSlot target = MapCotroller.Instance.ExistTargetSlot(curpos);
-
-        if (target != null)
-            transform.position = target.transform.position;
+        //UI 동기화
+        for (int i = 0; i < players.Length; ++i)
+        {
+            if (players[i].isMe)
+                UIGameManager.Instance.userCardMe.SyncState(players[i].state);
+            else
+                UIGameManager.Instance.userCardOther.SyncState(players[i].state);
+        }
     }
 
     #endregion
@@ -196,8 +218,26 @@ public class PlayerController : MonoBehaviourPunCallbacks//, IPunObservable
     {
         //if (photonView.IsMine) return;
 
-        SetPosition(index);
-        UpdatePlayer();
+        //공개된 상태에서 이동했을 때 점프 이펙트 및 이동 기록을 남긴다.
+        if (!isMe && isOpen)
+        {
+            UIGameManager.Instance.shadowTargetUI.ShowCount(curpos);
+            EffectController.Instance.ShowEfx(1, transform.position);
+            isOpen = false;
+        }
+
+        curpos = index;
+
+        transform.position = MapCotroller.Instance.GetSlotPosition(index);
+
+        //나만 보는 이동 후 효과
+        if (isMe || isOpen)
+        {
+            playerAnim.Land(); //잠깐 움츠리기
+            EffectController.Instance.ShowEfx(0, transform.position);
+        }
+
+        //UpdatePlayer();
 
         GameManager.Instance.AddReadyCount();
     }
@@ -210,7 +250,32 @@ public class PlayerController : MonoBehaviourPunCallbacks//, IPunObservable
     {
         //if (photonView.IsMine) return;
 
-        //SetPosition(index);
+        if (isMe || isOpen)
+        {
+            playerAnim.Slash();//검 및 스태프 형태
+            //playerAnim.Jab();//주먹 및 단검 형태
+            //playerAnim.Shot();//석궁 및 총 형태
+            //공격 효과음
+        }
+
+        //공격 이펙트는 보여주기
+        EffectController.Instance.ShowEfx(2, MapCotroller.Instance.GetSlotPosition(index));
+
+        //해당 위치에 있는 플레이어는 공격당하고 공개한다.
+        for (int i = 0; i < players.Length; ++i)
+        {
+            if (players[i].curpos == index) 
+            {
+                players[i].isOpen = true;
+                players[i].playerAnim.Hit();
+                players[i].state.GetDamage();
+
+                //내가 아닌 상태가 공격당하면 이전 공격카운트를 꺼준다.
+                if (!players[i].isMe)
+                    UIGameManager.Instance.shadowTargetUI.OffCount();
+            }
+        }
+
         UpdatePlayer();
     }
 

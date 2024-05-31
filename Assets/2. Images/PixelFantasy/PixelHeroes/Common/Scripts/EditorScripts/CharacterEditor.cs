@@ -17,7 +17,7 @@ using UnityEditor;
 namespace Assets.PixelFantasy.PixelHeroes.Common.Scripts.EditorScripts
 {
     public class CharacterEditor : MonoBehaviour
-    {        
+    {
         public SpriteCollection SpriteCollection;
         public List<LayerEditor> Layers;
         public CharacterBuilder CharacterBuilder;

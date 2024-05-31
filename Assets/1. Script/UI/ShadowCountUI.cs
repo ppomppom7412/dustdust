@@ -16,6 +16,7 @@ public class ShadowCountUI : MonoBehaviour
     Color curColor;
     float alphatime = 1.5f;
     IEnumerator alphaRtn;
+    MapSlot curSlot;
 
     private void Start()
     {
@@ -31,14 +32,24 @@ public class ShadowCountUI : MonoBehaviour
     /// 해당 UI 이동 호출
     /// </summary>
     /// <param name="targetslot"></param>
-    public void ShowCount(MapSlot targetslot) 
+    public void ShowCount(int index) 
     {
         currCount = 0;
 
         if (countTxt != null)
             countTxt.text = currCount.ToString();
 
+        transform.position = MapCotroller.Instance.GetSlotPosition(index);
+
         TransAlphaValue(1);
+    }
+
+    public void OffCount() 
+    {
+        if (alphaRtn != null)
+            StopCoroutine(alphaRtn);
+
+        gameObject.SetActive(false);
     }
 
     /// <summary>

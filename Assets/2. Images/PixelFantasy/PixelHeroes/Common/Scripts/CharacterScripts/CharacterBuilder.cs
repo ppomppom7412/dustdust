@@ -32,7 +32,6 @@ namespace Assets.PixelFantasy.PixelHeroes.Common.Scripts.CharacterScripts
         //종족 리스트
         public enum PresetList { None, Human, Elf, DarkElf, Demon, Goblin, Orc, Lizard, FireLizard, ZombieA, ZombieB, Skeleton, Vampire, Demigod, Merman, Furry, Werewolf, Max };
 
-
         public void Awake()
         {
             Rebuild();
@@ -272,13 +271,14 @@ namespace Assets.PixelFantasy.PixelHeroes.Common.Scripts.CharacterScripts
             return muzzlePosition;
         }
 
-        public void RebuildToString(string data) 
+        public void RebuildToString(string data)
         {
             string[] sprits = data.Split(',');
 
             for (int i = 0; i < sprits.Length; ++i)
             {
-                switch (i) {
+                switch (i)
+                {
                     case 0:
                         Head = sprits[i];
                         Ears = sprits[i];
@@ -332,6 +332,14 @@ namespace Assets.PixelFantasy.PixelHeroes.Common.Scripts.CharacterScripts
             }
 
             Rebuild();
+        }
+
+        public void SetAlphaValue(float alpha)
+        {
+            Color bodycolor = Character.Body.color;
+            bodycolor.a = alpha;
+
+            Character.Body.color = bodycolor;
         }
     }
 }

@@ -77,11 +77,13 @@ public class MapCotroller : MonoSingleton<MapCotroller>
     /// </summary>
     /// <param name="target_point"></param>
     /// <param name="shape"></param>
-    public void OnSlots(Vector2 target_point, SlotShape shape = SlotShape.Target) 
+    public void OnSlots(int index, SlotShape shape = SlotShape.Target) 
     {
         //초기화 및 비워주기
         activeSlots ??= new List<MapSlot>();
         activeSlots.Clear();
+
+        Vector2 target_point = TransMapVector2(index);
 
         switch (shape)
         {
@@ -212,6 +214,19 @@ public class MapCotroller : MonoSingleton<MapCotroller>
             DebugLogger.SendDebug("위치와 순서가 맞지 않는 슬롯이 호출되었습니다. slotpoint:"+ allSlot[targetindex].mapPoint.ToString() + " / callpoint:"+ point.ToString());
         
         return allSlot[targetindex];
+    }
+
+    /// <summary>
+    /// 맵 인덱스 기반으로 위치 반환
+    /// </summary>
+    /// <param name="index"></param>
+    /// <returns></returns>
+    public Vector3 GetSlotPosition(int index) 
+    {
+        if (allSlot.Count >= index)
+            return Vector3.zero;
+
+        return allSlot[index].transform.position;
     }
 
     #endregion
