@@ -7,16 +7,16 @@ using System;
 public class MapCotroller : MonoSingleton<MapCotroller>
 {
     public GameObject mapPrant;
-    public List<MapSlot> allSlot; //lowerleft sort, À¯´ÏÆ¼¿Í ºñ½ÁÇÑ ÁÂÇ¥±¸¼º
+    public List<MapSlot> allSlot; //lowerleft sort, ìœ ë‹ˆí‹°ì™€ ë¹„ìŠ·í•œ ì¢Œí‘œêµ¬ì„±
     List<MapSlot> activeSlots;
-    int callIndex = 0; //ºÎ¸¥ À§Ä¡ ÀÓ½ÃÀúÀå
+    int callIndex = 0; //ë¶€ë¥¸ ìœ„ì¹˜ ì„ì‹œì €ì¥
 
     public const int mapSizeX = 6; //0,1,2,3,4,5 = 6
     public const int mapSizeY = 6; //0,1,2,3,4,5 = 6
 
     public void Start()
     {
-        //¸®½ºÆ® ÃÊ±âÈ­
+        //ë¦¬ìŠ¤íŠ¸ ì´ˆê¸°í™”
         allSlot ??= new List<MapSlot>();
         activeSlots ??= new List<MapSlot>();
 
@@ -26,16 +26,17 @@ public class MapCotroller : MonoSingleton<MapCotroller>
 
             allSlot[i].slotindex = i;
             allSlot[i].mapPoint = GetMapPoint(0, i);
+            allSlot[i].SetText(i.ToString());
         }
     }
 
     /// <summary>
-    /// ¸Ê ½½·Ô¿¡¼­ Å¬¸¯µÊÀ» ¾Ë¸²
+    /// ë§µ ìŠ¬ë¡¯ì—ì„œ í´ë¦­ë¨ì„ ì•Œë¦¼
     /// </summary>
     /// <param name="call_slot"></param>
     public void CallingMapSlot(MapSlot call_slot)
     {
-        //³ÎÀÌ¸é ÅÏÀÌ ²¿ÀÏ ¼ö ÀÖÀ½À¸·Î Ãß°¡ÀûÀÎ Á¦¾îÃ³¸® ÇÊ¿ä
+        //ë„ì´ë©´ í„´ì´ ê¼¬ì¼ ìˆ˜ ìˆìŒìœ¼ë¡œ ì¶”ê°€ì ì¸ ì œì–´ì²˜ë¦¬ í•„ìš”
         if (call_slot == null){
             return;
         }
@@ -43,21 +44,21 @@ public class MapCotroller : MonoSingleton<MapCotroller>
         callIndex = (int)(call_slot.mapPoint.x * mapSizeX + call_slot.mapPoint.y);
         OffAllSlot();
 
-        //°ÔÀÓ ¸Å´ÏÀú¿¡°Ô ¼ÛÃâÇÏ±â
+        //ê²Œì„ ë§¤ë‹ˆì €ì—ê²Œ ì†¡ì¶œí•˜ê¸°
         GameManager.Instance.Action(callIndex);
     }
 
     #region slot func
 
     public enum SlotShape { Target, Cross, Around1, Around2, Around3, All, NotTarget, Random }
-    //                      1Ä­     ½ÊÀÚ   ÁÖº¯1Ä­  ÁÖº¯2Ä­  ÁÖº¯3Ä­  ÀüÃ¼ ³ª»©°íÀüÃ¼ ¾Æ¹«À§Ä¡ 1°³
+    //                      1ì¹¸     ì‹­ì   ì£¼ë³€1ì¹¸  ì£¼ë³€2ì¹¸  ì£¼ë³€3ì¹¸  ì „ì²´ ë‚˜ë¹¼ê³ ì „ì²´ ì•„ë¬´ìœ„ì¹˜ 1ê°œ
 
     /// <summary>
-    /// ´©¸¦ ¼ö ¾ø´Â »óÅÂ·Î ÀüÈ¯ÇÏ±â
+    /// ëˆ„ë¥¼ ìˆ˜ ì—†ëŠ” ìƒíƒœë¡œ ì „í™˜í•˜ê¸°
     /// </summary>
     public void OffAllSlot()
     {
-        //È°¼ºÈ­°¡ º°µµ·Î µÇ¾îÀÖÁö ¾Ê´Ù¸é ÀüºÎ ¿ÀÇÁ
+        //í™œì„±í™”ê°€ ë³„ë„ë¡œ ë˜ì–´ìˆì§€ ì•Šë‹¤ë©´ ì „ë¶€ ì˜¤í”„
         if (activeSlots == null || activeSlots.Count <= 0)
         {
             for (int i = 0; i < allSlot.Count; ++i)
@@ -73,17 +74,17 @@ public class MapCotroller : MonoSingleton<MapCotroller>
     }
 
     /// <summary>
-    /// ´©¸¦ ¼ö ÀÖ´Â »óÅÂ·Î ÀüÈ¯ÇÏ±â
+    /// ëˆ„ë¥¼ ìˆ˜ ìˆëŠ” ìƒíƒœë¡œ ì „í™˜í•˜ê¸°
     /// </summary>
     /// <param name="target_point"></param>
     /// <param name="shape"></param>
     public void OnSlots(int index, SlotShape shape = SlotShape.Target) 
     {
-        //ÃÊ±âÈ­ ¹× ºñ¿öÁÖ±â
+        //ì´ˆê¸°í™” ë° ë¹„ì›Œì£¼ê¸°
         activeSlots ??= new List<MapSlot>();
         activeSlots.Clear();
 
-        Vector2 target_point = TransMapVector2(index);
+        Vector2 target_point = GetMapPoint(0, index);
 
         switch (shape)
         {
@@ -192,8 +193,16 @@ public class MapCotroller : MonoSingleton<MapCotroller>
         }
     }
 
+    public int testindex;
+    [NaughtyAttributes.Button]
+    public void TestOnSlot() 
+    {
+        OffAllSlot();
+        OnSlots(testindex, SlotShape.Around1);
+    }
+
     /// <summary>
-    /// ÇØ´ç À§Ä¡¿¡ ½½·ÔÀÌ ÀÖ´ÂÁö È®ÀÎ
+    /// í•´ë‹¹ ìœ„ì¹˜ì— ìŠ¬ë¡¯ì´ ìˆëŠ”ì§€ í™•ì¸
     /// </summary>
     /// <param name="target_point"></param>
     /// <returns></returns>
@@ -204,26 +213,26 @@ public class MapCotroller : MonoSingleton<MapCotroller>
         if (point.y >= mapSizeY || point.y < 0)
             return null;
 
-        //ÀÎµ¦½º¿¡ µû¸¥ ½½·Ô Ã£±â
+        //ì¸ë±ìŠ¤ì— ë”°ë¥¸ ìŠ¬ë¡¯ ì°¾ê¸°
         int targetindex = (int)((point.x * mapSizeX) + point.y);
         if (allSlot.Count < targetindex)
             return null;
         if (allSlot[targetindex] == null)
             return null;
         if (allSlot[targetindex].mapPoint.x != point.x || allSlot[targetindex].mapPoint.y != point.y)
-            DebugLogger.SendDebug("À§Ä¡¿Í ¼ø¼­°¡ ¸ÂÁö ¾Ê´Â ½½·ÔÀÌ È£ÃâµÇ¾ú½À´Ï´Ù. slotpoint:"+ allSlot[targetindex].mapPoint.ToString() + " / callpoint:"+ point.ToString());
+            DebugLogger.SendDebug("ìœ„ì¹˜ì™€ ìˆœì„œê°€ ë§ì§€ ì•ŠëŠ” ìŠ¬ë¡¯ì´ í˜¸ì¶œë˜ì—ˆìŠµë‹ˆë‹¤. slotpoint:"+ allSlot[targetindex].mapPoint.ToString() + " / callpoint:"+ point.ToString());
         
         return allSlot[targetindex];
     }
 
     /// <summary>
-    /// ¸Ê ÀÎµ¦½º ±â¹İÀ¸·Î À§Ä¡ ¹İÈ¯
+    /// ë§µ ì¸ë±ìŠ¤ ê¸°ë°˜ìœ¼ë¡œ ìœ„ì¹˜ ë°˜í™˜
     /// </summary>
     /// <param name="index"></param>
     /// <returns></returns>
     public Vector3 GetSlotPosition(int index) 
     {
-        if (allSlot.Count >= index)
+        if (allSlot.Count <= index)
             return Vector3.zero;
 
         return allSlot[index].transform.position;
@@ -234,13 +243,13 @@ public class MapCotroller : MonoSingleton<MapCotroller>
     #region static get set trans
 
     /// <summary>
-    /// ¸Ê Æ÷ÀÎÆ®¿¡ ¸Â°Ô ¼öÁ¤
+    /// ë§µ í¬ì¸íŠ¸ì— ë§ê²Œ ìˆ˜ì •
     /// </summary>
     /// <param name="point"></param>
     /// <returns></returns>
     static public Vector2 GetMapPoint(float pointx, float pointy)
     {
-        while (pointx > mapSizeX)
+        while (pointx >= mapSizeX)
         {
             pointx -= 1;
             pointy += mapSizeX;
@@ -252,7 +261,7 @@ public class MapCotroller : MonoSingleton<MapCotroller>
             pointy -= mapSizeX;
         }
 
-        while (pointy > mapSizeY)
+        while (pointy >= mapSizeY)
         {
             pointy -= mapSizeY;
             pointx += 1;
@@ -268,17 +277,7 @@ public class MapCotroller : MonoSingleton<MapCotroller>
     }
 
     /// <summary>
-    /// ÀüÈ¯ int > vec2
-    /// </summary>
-    /// <param name="index"></param>
-    /// <returns></returns>
-    static public Vector2 TransMapVector2(int index)
-    {
-        return GetMapPoint(0, index);
-    }
-
-    /// <summary>
-    /// ÀüÈ¯ vec2 > int
+    /// ì „í™˜ vec2 > int
     /// </summary>
     /// <param name="point"></param>
     /// <returns></returns>

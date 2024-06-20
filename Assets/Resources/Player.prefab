@@ -332,8 +332,8 @@ MonoBehaviour:
   players: []
   isMe: 0
   curpos: 0
-  myCharID: 0
   isOpen: 0
+  isInit: 0
   playerAnim: {fileID: 805754593778945862}
   charBuilder: {fileID: 8040323894333085404}
   meMarker: {fileID: 4630175985651471743}

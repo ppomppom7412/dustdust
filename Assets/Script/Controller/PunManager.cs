@@ -11,32 +11,32 @@ public class PunManager : MonoBehaviourPunCallbacks
 {
     static public PunManager Instance;
 
-    public string gameVersion = "1"; //°ÔÀÓ ¹öÀü : ¸ÅÄª ¹× µ¿±âÈ­ Àü¿ë
-    public const byte MaxPlayerPerRoom = 2; //ÃÖ´ë ÀÎ¿ø
+    public string gameVersion = "1"; //ê²Œì„ ë²„ì „ : ë§¤ì¹­ ë° ë™ê¸°í™” ì „ìš©
+    public const byte MaxPlayerPerRoom = 2; //ìµœëŒ€ ì¸ì›
     public const float StartWaitTime = 2.5f;
 
-    //ÇÃ·¹ÀÌ¾î µ¥ÀÌÅÍ
+    //í”Œë ˆì´ì–´ ë°ì´í„°
     public Player myPlayer = null;
     public List<Player> curPlayers = null;
-    int connectCount = 0; //¿¬°áÈ½¼ö
+    int connectCount = 0; //ì—°ê²°íšŸìˆ˜
 
-    //0±âº» -1²÷±è 10¿¬°á 20¹æ¸¸µë 21¹æµé¾î¿È 30¹æ³ª°¨ 31´©°¡³ª°¨ 40°ÔÀÓ½ÃÀÛ
+    //0ê¸°ë³¸ -1ëŠê¹€ 10ì—°ê²° 20ë°©ë§Œë“¬ 21ë°©ë“¤ì–´ì˜´ 30ë°©ë‚˜ê° 31ëˆ„ê°€ë‚˜ê° 40ê²Œì„ì‹œì‘
     int state = 0;
 
     #region MonoBehaviour 
 
     private void Awake()
     {
-        //ÀÌ¸¦ ÅëÇØ ¸¶½ºÅÍ Å¬¶óÀÌ¾ğÆ®¿¡¼­ PhotonNetwork.LoadLevel()À» »ç¿ëÇÒ ¼ö ÀÖ°í
-        //°°Àº ¹æ¿¡ ÀÖ´Â ¸ğµç Å¬¶óÀÌ¾ğÆ®°¡ ·¹º§À» ÀÚµ¿À¸·Î µ¿±âÈ­ÇÒ ¼ö ÀÖ½À´Ï´Ù.
-        // >Áï ¾À ÀÚµ¿ µ¿±âÈ­(loadlevelÀ» ÅëÇÑ) ¿©ºÎ 
+        //ì´ë¥¼ í†µí•´ ë§ˆìŠ¤í„° í´ë¼ì´ì–¸íŠ¸ì—ì„œ PhotonNetwork.LoadLevel()ì„ ì‚¬ìš©í•  ìˆ˜ ìˆê³ 
+        //ê°™ì€ ë°©ì— ìˆëŠ” ëª¨ë“  í´ë¼ì´ì–¸íŠ¸ê°€ ë ˆë²¨ì„ ìë™ìœ¼ë¡œ ë™ê¸°í™”í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤.
+        // >ì¦‰ ì”¬ ìë™ ë™ê¸°í™”(loadlevelì„ í†µí•œ) ì—¬ë¶€ 
         PhotonNetwork.AutomaticallySyncScene = true;
 
         if (Instance == null)
         {
             Instance = this; 
 
-            //Àı´ë »èÁ¦ ±İÁö
+            //ì ˆëŒ€ ì‚­ì œ ê¸ˆì§€
             DontDestroyOnLoad(this.gameObject);
         }
         else 
@@ -55,39 +55,39 @@ public class PunManager : MonoBehaviourPunCallbacks
     #region net func
 
     /// <summary>
-    /// Æ÷Åæ ¿¬°á ¹× ¹æÀÔÀå
+    /// í¬í†¤ ì—°ê²° ë° ë°©ì…ì¥
     /// </summary>
     public void Connect()
     {
         PhotonNetwork.NickName = UIGameManager.Instance.GetNicknameFieldValue();
         UIGameManager.Instance.SetStartButton(false);
 
-        //¼­¹ö ¿¬°á ¼º°ø
+        //ì„œë²„ ì—°ê²° ì„±ê³µ
         if (PhotonNetwork.IsConnected)
         {
-            // ÀÌ ½ÃÁ¡¿¡¼­ Random Room¿¡ Âü¿©ÇÏ·Á¸é Áß¿äÇÕ´Ï´Ù.
-            // ½ÇÆĞÇÏ¸é OnJoinRandomFailed()¿¡¼­ ¾Ë¸²À» ¹Ş°í ÇÏ³ª¸¦ »ı¼ºÇÕ´Ï´Ù.
+            // ì´ ì‹œì ì—ì„œ Random Roomì— ì°¸ì—¬í•˜ë ¤ë©´ ì¤‘ìš”í•©ë‹ˆë‹¤.
+            // ì‹¤íŒ¨í•˜ë©´ OnJoinRandomFailed()ì—ì„œ ì•Œë¦¼ì„ ë°›ê³  í•˜ë‚˜ë¥¼ ìƒì„±í•©ë‹ˆë‹¤.
             //PhotonNetwork.JoinRandomRoom();
         }
-        //¼­¹ö ¿¬°á ½ÇÆĞ
+        //ì„œë²„ ì—°ê²° ì‹¤íŒ¨
         else
         {
             if (++connectCount < 10)
             {
-                // °¡Àå ¸ÕÀú Photon ¿Â¶óÀÎ ¼­¹ö¿¡ ¿¬°áÇØ¾ß ÇÕ´Ï´Ù.
+                // ê°€ì¥ ë¨¼ì € Photon ì˜¨ë¼ì¸ ì„œë²„ì— ì—°ê²°í•´ì•¼ í•©ë‹ˆë‹¤.
                 PhotonNetwork.GameVersion = gameVersion;
                 PhotonNetwork.ConnectUsingSettings();
             }
             else
             {
-                //10¹øÀÌ»ó ½ÃµµÇßÀ» °æ¿ì Á¾·á
+                //10ë²ˆì´ìƒ ì‹œë„í–ˆì„ ê²½ìš° ì¢…ë£Œ
                 Application.Quit();
             }
         }
     }
 
     /// <summary>
-    /// ¿¬°á ²÷±â
+    /// ì—°ê²° ëŠê¸°
     /// </summary>
     public void Disconnect()
     {
@@ -95,7 +95,7 @@ public class PunManager : MonoBehaviourPunCallbacks
     }
 
     /// <summary>
-    /// ¹æ ³ª°¡±â
+    /// ë°© ë‚˜ê°€ê¸°
     /// </summary>
     public void LeaveRoom()
     {
@@ -103,18 +103,18 @@ public class PunManager : MonoBehaviourPunCallbacks
     }
 
     /// <summary>
-    /// ÇÃ·¹ÀÌ¾î Á¤º¸ ´ã±â
+    /// í”Œë ˆì´ì–´ ì •ë³´ ë‹´ê¸°
     /// </summary>
     void SetRoomPlayer()
     {
         myPlayer = PhotonNetwork.LocalPlayer;
         curPlayers = new List<Player>();
 
-        //prev : ÀÚ½ÅÀ» ±âÁØÀ¸·Î ´ã´Â ¹®Á¦°¡ ÀÖÀ½
+        //prev : ìì‹ ì„ ê¸°ì¤€ìœ¼ë¡œ ë‹´ëŠ” ë¬¸ì œê°€ ìˆìŒ
         //foreach (int key in PhotonNetwork.CurrentRoom.Players.Keys) 
         //    curPlayers.Add(PhotonNetwork.CurrentRoom.Players[key]);
 
-        //new : ¹æ¿¡ µé¾î¿Â ¼ø¼­·Î ´ã´Â´Ù.
+        //new : ë°©ì— ë“¤ì–´ì˜¨ ìˆœì„œë¡œ ë‹´ëŠ”ë‹¤.
         for (int i = 0; i < PhotonNetwork.PlayerList.Length; ++i)
             curPlayers.Add(PhotonNetwork.PlayerList[i]);
     }
@@ -124,19 +124,19 @@ public class PunManager : MonoBehaviourPunCallbacks
     #region MonoBehaviourPunCallbacks Callbacks
 
     /// <summary>
-    /// ¿¬°á ¼º°ø Äİ¹é
+    /// ì—°ê²° ì„±ê³µ ì½œë°±
     /// </summary>
     public override void OnConnectedToMaster()
     {
         state = 10;
         DebugLogger.SendDebug("Launcher : OnConnectedToMaster()");
 
-        //¼º°øÇßÀ¸¸é ·ë¿¡ µé¾î°¡±â
+        //ì„±ê³µí–ˆìœ¼ë©´ ë£¸ì— ë“¤ì–´ê°€ê¸°
         PhotonNetwork.JoinRandomRoom();
     }
 
     /// <summary>
-    /// ¿¬°á ²÷±è Äİ¹é
+    /// ì—°ê²° ëŠê¹€ ì½œë°±
     /// </summary>
     /// <param name="cause"></param>
     public override void OnDisconnected(DisconnectCause cause)
@@ -148,7 +148,7 @@ public class PunManager : MonoBehaviourPunCallbacks
     }
 
     /// <summary>
-    /// ·£´ı ·ë ÁøÀÔ ½ÇÆĞ
+    /// ëœë¤ ë£¸ ì§„ì… ì‹¤íŒ¨
     /// </summary>
     /// <param name="returnCode"></param>
     /// <param name="message"></param>
@@ -156,7 +156,7 @@ public class PunManager : MonoBehaviourPunCallbacks
     {
         DebugLogger.SendDebug("Launcher : OnJoinRandomFailed()");
 
-        // ¹æÀÌ ¾ø°Å³ª ¸ğµÎ ²Ë Ã¡À» ¼ö ÀÖ½À´Ï´Ù.
+        // ë°©ì´ ì—†ê±°ë‚˜ ëª¨ë‘ ê½‰ ì°¼ì„ ìˆ˜ ìˆìŠµë‹ˆë‹¤.
         if (state.Equals(10))
         {
             DebugLogger.SendDebug("Launcher : CreateRoom()");
@@ -165,7 +165,7 @@ public class PunManager : MonoBehaviourPunCallbacks
     }
 
     /// <summary>
-    /// ·£´ı ·ë ÁøÀÔ ¼º°ø
+    /// ëœë¤ ë£¸ ì§„ì… ì„±ê³µ
     /// </summary>
     public override void OnJoinedRoom()
     {
@@ -174,39 +174,44 @@ public class PunManager : MonoBehaviourPunCallbacks
 
         UIGameManager.Instance.SetConnectText("Wait to other player [1/2]");
 
-        ////[´ë±â °ü¸®] È¥ÀÚ¸é ±â´Ù¸°´Ù.
+        ////[ëŒ€ê¸° ê´€ë¦¬] í˜¼ìë©´ ê¸°ë‹¤ë¦°ë‹¤.
         //if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
         //{
-        //    ////´ë±â ¹æÀ¸·Î
+        //    ////ëŒ€ê¸° ë°©ìœ¼ë¡œ
         //    //PhotonNetwork.LoadLevel("ReadyScene");
         //}
 
-        //ÀÎ¿ø¼ö°¡ Ã¡À¸¸é ½ÃÀÛÇÒ°Ì´Ï´Ù.
+        //ì¸ì›ìˆ˜ê°€ ì°¼ìœ¼ë©´ ì‹œì‘í• ê²ë‹ˆë‹¤.
         if (PhotonNetwork.CurrentRoom.PlayerCount >= MaxPlayerPerRoom)
         {
-            StopAllCoroutines();
-            StartCoroutine(WaitToStartRoutine(StartWaitTime));
+            //ê²Œì„ ë¡œë”© ë¶€ë¥´ê¸°
+            if (state < 40)
+            {
+                state = 40;
+                SetRoomPlayer();
+                UIGameManager.Instance.OpenLoadingPanel();
+            }
         }
     }
 
     /// <summary>
-    /// (³»°¡) ¹æ¿¡¼­ ¶°³¯ ¶§
+    /// (ë‚´ê°€) ë°©ì—ì„œ ë– ë‚  ë•Œ
     /// </summary>
     public override void OnLeftRoom()
     {
         state = 30;
 
-        ////·Îºñ·Î µ¹¾Æ¿À±â (¾À¿¡¼­ ·Îºñ·Î)
+        ////ë¡œë¹„ë¡œ ëŒì•„ì˜¤ê¸° (ì”¬ì—ì„œ ë¡œë¹„ë¡œ)
         //SceneManager.LoadScene(0);
-        ////ÃÊ±â¼¼ÆÃ¸¸µé±â
+        ////ì´ˆê¸°ì„¸íŒ…ë§Œë“¤ê¸°
         //UIGameManager.Instance.SetStartButton(true);
 
-        //·Îºñ·Î µ¹¾Æ¿À±â (°°Àº ¾À¿¡¼­ ·Îºñ·Î)
+        //ë¡œë¹„ë¡œ ëŒì•„ì˜¤ê¸° (ê°™ì€ ì”¬ì—ì„œ ë¡œë¹„ë¡œ)
         UIGameManager.Instance.OpenLobbyPanel();
     }
 
     /// <summary>
-    /// ´©±º°¡ ¹æ¿¡ µé¾î¿Ã ¶§
+    /// ëˆ„êµ°ê°€ ë°©ì— ë“¤ì–´ì˜¬ ë•Œ
     /// </summary>
     /// <param name="other"></param>
     public override void OnPlayerEnteredRoom(Player other)
@@ -214,9 +219,17 @@ public class PunManager : MonoBehaviourPunCallbacks
         state = 21;
         DebugLogger.SendDebug("GameManager : EnteredRoom()" + other.NickName);
 
-        //½ÇÁúÀûÀ¸·Î ºÒ¸®´Â 
-        StopAllCoroutines();
-        StartCoroutine(WaitToStartRoutine(StartWaitTime));
+        //ê²Œì„ ì‹œì‘ ë¶€ë¥´ê¸°
+        //StopAllCoroutines();
+        //StartCoroutine(WaitToStartRoutine(StartWaitTime)); 
+
+        //ê²Œì„ ë¡œë”© ë¶€ë¥´ê¸°
+        if (state < 40)
+        {
+            state = 40;
+            SetRoomPlayer();
+            UIGameManager.Instance.OpenLoadingPanel();
+        }
 
         //if (PhotonNetwork.IsMasterClient)
         //{
@@ -225,7 +238,7 @@ public class PunManager : MonoBehaviourPunCallbacks
     }
 
     /// <summary>
-    /// ´©±º°¡ ¹æ¿¡¼­ ³ª°¥ ¶§
+    /// ëˆ„êµ°ê°€ ë°©ì—ì„œ ë‚˜ê°ˆ ë•Œ
     /// </summary>
     /// <param name="other"></param>
     public override void OnPlayerLeftRoom(Player other)
@@ -237,7 +250,7 @@ public class PunManager : MonoBehaviourPunCallbacks
             state = 31;
             PhotonNetwork.LeaveRoom();
         }
-        //Ãß°¡++ ´©±º°¡ ³ª°¡¸é ³ªµµ »õ·Ó°Ô ¹æÀ» Àâ¾Æ¾ßÇÑ´Ù.
+        //ì¶”ê°€++ ëˆ„êµ°ê°€ ë‚˜ê°€ë©´ ë‚˜ë„ ìƒˆë¡­ê²Œ ë°©ì„ ì¡ì•„ì•¼í•œë‹¤.
         else
         {
             state = 31;
@@ -250,7 +263,7 @@ public class PunManager : MonoBehaviourPunCallbacks
     #region Routine func
 
     /// <summary>
-    /// ´ë±â ½Ã°£ ÈÄ °ÔÀÓ¾ÀÀ¸·Î ÀÌµ¿
+    /// ëŒ€ê¸° ì‹œê°„ í›„ ê²Œì„ì”¬ìœ¼ë¡œ ì´ë™
     /// </summary>
     /// <param name="wait_time"></param>
     /// <returns></returns>
@@ -258,7 +271,7 @@ public class PunManager : MonoBehaviourPunCallbacks
     {
         WaitForSecondsRealtime wait01f = new WaitForSecondsRealtime(0.1f);
 
-        //³ª°¥ ¼ö ¾ø°Ô ¸·¾ÆµÎ±â
+        //ë‚˜ê°ˆ ìˆ˜ ì—†ê²Œ ë§‰ì•„ë‘ê¸°
         UIGameManager.Instance.exitButton.SetActive(false);
 
         while (wait_time > 0) 
@@ -268,16 +281,15 @@ public class PunManager : MonoBehaviourPunCallbacks
             wait_time -= 0.1f;
         }
 
-
         state = 40;
         SetRoomPlayer();
 
-        //°ÔÀÓ ¾ÀÀ» ºÎ¸£´Â ¹æ½Ä
+        //ê²Œì„ ì”¬ì„ ë¶€ë¥´ëŠ” ë°©ì‹
         //if (PhotonNetwork.IsMasterClient)
         //    PhotonNetwork.LoadLevel("GameScene");
 
-        //°°Àº ¾À¿¡¼­ ºÎ¸£´Â ¹æ½Ä
-        GameManager.Instance.StartGame();
+        //ê°™ì€ ì”¬ì—ì„œ ë¶€ë¥´ëŠ” ë°©ì‹
+        GameManager.Instance.InitGame();
     }
 
     #endregion

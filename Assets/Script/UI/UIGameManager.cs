@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Singleton;
+using DG.Tweening;
+using NaughtyAttributes;
 
 public class UIGameManager : MonoSingleton<UIGameManager>
 {
@@ -20,22 +22,28 @@ public class UIGameManager : MonoSingleton<UIGameManager>
 
     [Header("Ingame UI")]
     public GameObject IngamePanel;
-    public UserNameUI userCardMe;//³ª
-    public UserNameUI userCardOther;//»ó´ë
-    public ShadowCountUI shadowTargetUI;//º°µµ·Î ÀÛµ¿ÇÏ´Â UI Àç±¸¼ºÇÏ±â
+    public UserNameUI userCardMe;//ë‚˜
+    public UserNameUI userCardOther;//ìƒëŒ€
+    public ShadowCountUI shadowTargetUI;//ë³„ë„ë¡œ ì‘ë™í•˜ëŠ” UI ì¬êµ¬ì„±í•˜ê¸°
     public CountDownUI countDwUI;
     public GameObject skipButton;
     public GameObject myTurnUI;
     public GameObject[] actIcons;
 
+    [Header("Loading UI")]
+    public GameObject LoadingPanel;
+    public Slider loadSlider;
+    public Text loadText;
+
     #region MonoBehaviour func
 
     private void Start()
     {
-        //ÅÏ º¯°æ½ÃÀÇ ÀÌº¥Æ® µî·Ï
+        //í„´ ë³€ê²½ì‹œì˜ ì´ë²¤íŠ¸ ë“±ë¡
         GameManager.Instance.ChangeTurn.AddListener(UpdateTurnImage);
 
         OpenLobbyPanel();
+        LoadingPanel.SetActive(false);
     }
 
     //private void OnDestroy()
@@ -48,7 +56,7 @@ public class UIGameManager : MonoSingleton<UIGameManager>
     #region Lobby UI func
 
     /// <summary>
-    /// ·Îºñ ÆĞ³Î ¿­±â
+    /// ë¡œë¹„ íŒ¨ë„ ì—´ê¸°
     /// </summary>
     public void OpenLobbyPanel() 
     {
@@ -57,12 +65,12 @@ public class UIGameManager : MonoSingleton<UIGameManager>
 
         MapCotroller.Instance.mapPrant.SetActive(false);
 
-        //ÃÊ±â ¼¼ÆÃÇÏ±â
+        //ì´ˆê¸° ì„¸íŒ…í•˜ê¸°
         SetStartButton(true);
     }
 
     /// <summary>
-    /// ÀÎÇ²ÇÊµå ³»ºÎ¿¡ ÀûÈù ´Ğ³×ÀÓÀ» °¡Á®¿Â´Ù.
+    /// ì¸í’‹í•„ë“œ ë‚´ë¶€ì— ì íŒ ë‹‰ë„¤ì„ì„ ê°€ì ¸ì˜¨ë‹¤.
     /// </summary>
     /// <returns></returns>
     public string GetNicknameFieldValue()
@@ -76,14 +84,14 @@ public class UIGameManager : MonoSingleton<UIGameManager>
     }
 
     /// <summary>
-    /// ¸ÅÄª ¹öÆ° ¿Â¿ÀÇÁ
+    /// ë§¤ì¹­ ë²„íŠ¼ ì˜¨ì˜¤í”„
     /// </summary>
     /// <param name="isOnOff"></param>
     public void SetStartButton(bool isOnOff)
     {
         if (startButton == null) return;
 
-        //ÀÌÀü
+        //ì´ì „
         //startButton.gameObject.SetActive(isOnOff);
         //if (connectText != null)
         //{
@@ -91,7 +99,7 @@ public class UIGameManager : MonoSingleton<UIGameManager>
         //    connectText.text = "";
         //}
 
-        //ÀÌÈÄ
+        //ì´í›„
         if (isOnOff)
         {
             nickField.enabled = true;
@@ -117,7 +125,7 @@ public class UIGameManager : MonoSingleton<UIGameManager>
     }
 
     /// <summary>
-    /// ¿¬°á ¸Ş¼¼Áö Ç¥±â
+    /// ì—°ê²° ë©”ì„¸ì§€ í‘œê¸°
     /// </summary>
     /// <param name="message"></param>
     public void SetConnectText(string message)
@@ -128,7 +136,7 @@ public class UIGameManager : MonoSingleton<UIGameManager>
     }
 
     /// <summary>
-    /// ´Ğ³×ÀÓ Ç¥±â
+    /// ë‹‰ë„¤ì„ í‘œê¸°
     /// </summary>
     /// <param name="nickstring"></param>
     public void SetNicknameText(string nickstring)
@@ -142,7 +150,7 @@ public class UIGameManager : MonoSingleton<UIGameManager>
     #region Ingame UI func
 
     /// <summary>
-    /// ÀÎ°ÔÀÓ ÆĞ³Î¿­±â
+    /// ì¸ê²Œì„ íŒ¨ë„ì—´ê¸°
     /// </summary>
     public void OpenIngamePanel() 
     {
@@ -160,7 +168,7 @@ public class UIGameManager : MonoSingleton<UIGameManager>
     }
 
     /// <summary>
-    /// ´Ğ³×ÀÓ ¼³Á¤ÇÏ±â
+    /// ë‹‰ë„¤ì„ ì„¤ì •í•˜ê¸°
     /// </summary>
     public void SetNicknameText()
     {
@@ -176,7 +184,7 @@ public class UIGameManager : MonoSingleton<UIGameManager>
     }
 
     /// <summary>
-    /// ÅÏ º¯°æ½Ã Ç¥±â ¾÷µ¥ÀÌÆ®
+    /// í„´ ë³€ê²½ì‹œ í‘œê¸° ì—…ë°ì´íŠ¸
     /// </summary>
     public void UpdateTurnImage() 
     {
@@ -195,12 +203,12 @@ public class UIGameManager : MonoSingleton<UIGameManager>
             userCardOther.SetTurn(true);
         }
 
-        //Çàµ¿ Á¦¾î ½Ã°£ + ½Ã°£ÃÊ°ú½Ã Çàµ¿ ³Ñ±è
+        //í–‰ë™ ì œì–´ ì‹œê°„ + ì‹œê°„ì´ˆê³¼ì‹œ í–‰ë™ ë„˜ê¹€
         countDwUI.StartTimer(GameManager.waittime);
     }
 
     /// <summary>
-    /// ÇöÀç ¾×¼Ç¿¡ ´ëÇÑ Ç¥±â
+    /// í˜„ì¬ ì•¡ì…˜ì— ëŒ€í•œ í‘œê¸°
     /// </summary>
     /// <param name="act"></param>
     public void ShowActionIcon(int act)
@@ -212,6 +220,74 @@ public class UIGameManager : MonoSingleton<UIGameManager>
             else
                 actIcons[i].SetActive(false);
         }
+    }
+
+    #endregion
+
+    #region Loading UI func
+
+    public void OpenLoadingPanel() 
+    {
+        //ì¼œë‘” íŒì—… ì§€ìš°ê¸°
+        YellowGreen.Popup.PopupManager.Instance.AllClosePop();
+
+        //ëª» ë‹«ê³  ëª» ì—´ê²Œ ë§Œë“¤ê¸°
+        YellowGreen.Popup.PopupManager.Instance.AddInputBlock();
+
+        loadSlider.value = 0f;
+        loadText.text = "0%";
+
+        //ë¡œë”© íŒì—…ì„ ì¼œê³  ë’¤ì—ëŠ” ì¸ê²Œì„ì„ ì—´ì–´ì¤€ë‹¤,
+        LoadingPanel.SetActive(true);
+        OpenIngamePanel();
+
+        StartCoroutine(WaitToPlayer(5.0f));
+    }
+
+    IEnumerator WaitToPlayer(float wait_time) 
+    {
+        float progress = 0f;
+        WaitForSeconds wait02f = new WaitForSeconds(0.2f);
+        WaitForSeconds waittarget = new WaitForSeconds(wait_time);
+
+        //ì¸ê²Œì„ ì´ˆê¸°í™”
+        GameManager.Instance.InitGame();
+
+        //90%ê¹Œì§€ ìë™ì´ë™
+        DOTween.To(() => progress, per => progress = per, 0.9f, wait_time)
+            .OnUpdate(() => { SetLoadSlider(progress); });
+
+        yield return wait_time;
+
+        //1ëª… ì™„ë£Œì‹œ 95%
+        while (GameManager.Instance.GetReadyCount() < 2)
+            yield return wait02f;
+
+        //95%ê¹Œì§€ ìë™ì´ë™
+        DOTween.To(() => progress, per => progress = per, 0.95f, 0.15f)
+            .OnUpdate(() => { SetLoadSlider(progress); });
+
+        yield return wait02f;
+
+        while (GameManager.Instance.GetReadyCount() < 4)
+            yield return wait02f;
+
+        //100%ê¹Œì§€ ìë™ì´ë™
+        DOTween.To(() => progress, per => progress = per, 1f, 0.15f)
+            .OnUpdate(() => { SetLoadSlider(progress); });
+
+        yield return wait02f;
+
+        YellowGreen.Popup.PopupManager.Instance.RemovePop();
+        LoadingPanel.SetActive(false);
+
+        GameManager.Instance.AddReadyCount();
+    }
+
+    void SetLoadSlider(float value) 
+    {
+        loadSlider.value = value;
+        loadText.text = (loadSlider.value * 100f).ToString("0") + "%";
     }
 
     #endregion

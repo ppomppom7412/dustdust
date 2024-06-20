@@ -1,29 +1,71 @@
+using DG.Tweening;
+using NaughtyAttributes;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MapSlot : MonoBehaviour
 {
-    public GameObject slotBtn;
+    public Button slotBtn;
+    public Text slottext;
+    public TweenUIImange crackTwImg;
 
-    public Vector2 mapPoint; //¸Ê»óÀÇ x,yÁÂÇ¥
-    public int slotindex;//½½·ÔµéÀÇ ¼ø¼­»ó
+    public Vector2 mapPoint; //ë§µìƒì˜ x,yì¢Œí‘œ
+    public int slotindex;//ìŠ¬ë¡¯ë“¤ì˜ ìˆœì„œìƒ
+    public int damge;
+
+    public void Start()
+    {
+        crackTwImg.gameObject.SetActive(false);
+
+        GameManager.Instance.ChangeTurn.AddListener(DownDamage);
+    }
+
+    public void SetText(string content)
+    {
+        if (slottext != null)
+            slottext.text = content;
+    }
 
     /// <summary>
-    /// ¹öÆ° È°¼ºÈ­ ¿©ºÎ
+    /// ë²„íŠ¼ í™œì„±í™” ì—¬ë¶€
     /// </summary>
     /// <param name="isOn"></param>
     public void OnOffButton(bool isOn) 
     {
-        slotBtn?.SetActive(isOn);
+        slotBtn?.gameObject.SetActive(isOn);
     }
 
     /// <summary>
-    /// Å¬¸¯ ´çÇßÀ» ¶§ ¸Ê ÄÁÆ®·Ñ·¯¿¡°Ô Àü´ŞÇÑ´Ù.
+    /// í´ë¦­ ë‹¹í–ˆì„ ë•Œ ë§µ ì»¨íŠ¸ë¡¤ëŸ¬ì—ê²Œ ì „ë‹¬í•œë‹¤.
     /// </summary>
-    public void ClickThisSlot() 
+    public void ClickThisSlot()
     {
+        slotBtn.interactable = false;
+        slotBtn.interactable = true;
+
         MapCotroller.Instance.CallingMapSlot(this);
     }
 
+    [Button]
+    public void OnDamage() 
+    {
+        crackTwImg.gameObject.SetActive(false);
+
+        damge = 2;
+        crackTwImg.transform.Rotate(Vector3.forward * Random.Range(-360f, 360f));
+        crackTwImg.gameObject.SetActive(true);
+    }
+
+    [Button]
+    public void DownDamage() 
+    {
+        if (damge < 0) return;
+
+        crackTwImg.SetSprite(--damge);
+
+        if (damge < 0)
+            crackTwImg.gameObject.SetActive(false);
+    }
 }

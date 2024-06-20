@@ -2,23 +2,38 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
 using Photon.Pun;
 
 using Assets.PixelFantasy.PixelHeroes.Common.Scripts.CharacterScripts;
 using Assets.PixelFantasy.PixelHeroes.Common.Scripts.ExampleScripts;
+using Photon.Realtime;
 
 public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
 {
-    //º»ÀÎ ¿ÀºêÁ§Æ® È®ÀÎ¿ë
+    //ë³¸ì¸ ì˜¤ë¸Œì íŠ¸ í™•ì¸ìš©
     public static PlayerController LocalInstance;
-    public PhotonView PV; //ÀÌº¥Æ® ¼Û¼ö½Å //ÀÌ°Å ¾øÀÎ »ı¼ºÀÌ ¾ÈµÊ ¤Ğ
+    public PhotonView PV; //ì´ë²¤íŠ¸ ì†¡ìˆ˜ì‹  //ì´ê±° ì—†ì¸ ìƒì„±ì´ ì•ˆë¨ ã… 
     public PlayerController[] players;
 
     [Header("data")]
     public bool isMe = false;
     public int curpos;
-    public int myCharID = 0;
-    public bool isOpen = false;
+    bool isOpen = false;
+    public bool IsOpen 
+    {
+        set {
+            isOpen = value;
+
+            if (isOpen)
+                charBuilder.SetAlphaValue(1);
+            else
+                charBuilder.SetAlphaValue(0);
+        }
+
+        get { return isOpen; }
+    }
+    public bool isInit = false;
     public PlayerState state;
 
     [Header("Object")]
@@ -44,19 +59,32 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
 
     public override void OnEnable()
     {
-        if (LocalInstance == this)
-            isMe = true;
-        else
-            isMe = false;
-
-        meMarker.SetActive(isMe);
-
-        //¼Â¾÷ Àü±îÁø ¾Èº¸ÀÌ°Ô ÇÏÀÚ
+        //ì…‹ì—… ì „ê¹Œì§„ ì•ˆë³´ì´ê²Œ í•˜ì
         charBuilder.SetAlphaValue(0);
 
         state.Init();
 
-        StartCoroutine(StartSetup());
+        isInit = false;
+
+        if (LocalInstance == this)
+        {
+            isMe = true;
+            gameObject.name = PunManager.Instance.myPlayer.NickName;
+
+            //Send Ready GameScene
+            PV.RPC("ReceivedReady", RpcTarget.All);
+        }
+        else
+        {
+            isMe = false;
+            for (int i = 0; i < PunManager.Instance.curPlayers.Count; ++i)
+            {
+                if (PunManager.Instance.curPlayers[i] != PunManager.Instance.myPlayer)
+                    gameObject.name = PunManager.Instance.curPlayers[i].NickName;
+            }
+        }
+
+        //StartCoroutine(StartSetup());
     }
 
     #endregion
@@ -64,7 +92,7 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
     #region IPunObservable implementation
 
     ///// <summary>
-    ///// ¹Ş°Å³ª º¸³»±â
+    ///// ë°›ê±°ë‚˜ ë³´ë‚´ê¸°
     ///// </summary>
     ///// <param name="stream"></param>
     ///// <param name="info"></param>
@@ -74,8 +102,8 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
     //    {
     //        DebugLogger.SendDebug("PlayerController : Send Next()");
 
-    //        //¿ì¸®´Â ÀÌ ÇÃ·¹ÀÌ¾î¸¦ ¼ÒÀ¯ÇÏ°í ÀÖ½À´Ï´Ù:
-    //        //´Ù¸¥ ÇÃ·¹ÀÌ¾î¿¡°Ô µ¥ÀÌÅÍ¸¦ º¸³À´Ï´Ù.
+    //        //ìš°ë¦¬ëŠ” ì´ í”Œë ˆì´ì–´ë¥¼ ì†Œìœ í•˜ê³  ìˆìŠµë‹ˆë‹¤:
+    //        //ë‹¤ë¥¸ í”Œë ˆì´ì–´ì—ê²Œ ë°ì´í„°ë¥¼ ë³´ëƒ…ë‹ˆë‹¤.
     //        stream.SendNext(curpos);
     //        stream.SendNext(myCharID);
     //    }
@@ -83,7 +111,7 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
     //    {
     //        DebugLogger.SendDebug("PlayerController : Receive Next()");
 
-    //        // ³×Æ®¿öÅ© ÇÃ·¹ÀÌ¾î, µ¥ÀÌÅÍ ¼ö½Å
+    //        // ë„¤íŠ¸ì›Œí¬ í”Œë ˆì´ì–´, ë°ì´í„° ìˆ˜ì‹ 
     //        this.curpos = (Vector2)stream.ReceiveNext();
     //        this.myCharID = (int)stream.ReceiveNext();
 
@@ -96,31 +124,11 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
     #region main func
 
     /// <summary>
-    /// ½ÃÀÛÀ» À§ÇÑ ÁØºñ
-    /// </summary>
-    /// <returns></returns>
-    IEnumerator StartSetup()
-    {
-        yield return new WaitForSeconds(0.8f);
-
-        //ÇÁ¸®ÆÕ ¿ÜÇü ¾Æ¹«°Å³ª ¼¼ÆÃÇÏ±â
-        //³ªÁß¿£ ·Îºñ¿¡¼­ ¼¼ÆÃÇÑ °ªÀ¸·Î º¸³»´Â °ÍÀ¸·Î ÇÏ±â
-        SendCustom(((CharacterBuilder.PresetList)(Random.Range(1, 17))).ToString());
-
-        //·£´ı À§Ä¡ ÁöÁ¤
-        SendChange(0, Random.Range(0, MapCotroller.mapSizeX * MapCotroller.mapSizeY - 1));
-
-        //ÇÃ·¹ÀÌ¾î¸¦ ¸ğµÎ ´ã¾ÆÁØ´Ù.
-        players = FindObjectsOfType<PlayerController>();
-
-    }
-
-    /// <summary>
-    /// ¼­¹ö¿¡¼­ º¸³½ °ÍÀ» ±â¹İÀ¸·Î º¯°æÇÑ´Ù.
+    /// ì„œë²„ì—ì„œ ë³´ë‚¸ ê²ƒì„ ê¸°ë°˜ìœ¼ë¡œ ë³€ê²½í•œë‹¤.
     /// </summary>
     void UpdatePlayer()
     {
-        //UI µ¿±âÈ­
+        //UI ë™ê¸°í™”
         for (int i = 0; i < players.Length; ++i)
         {
             if (players[i].isMe)
@@ -130,12 +138,32 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
         }
     }
 
+    /// <summary>
+    /// ì´ˆê¸° ìœ„ì¹˜ ë° í”Œë ˆì´ì–´ ì„¸íŒ…
+    /// </summary>
+    void InitPlayer() 
+    {
+        isInit = true;
+
+        meMarker.SetActive(isMe);
+
+        //í”„ë¦¬íŒ¹ ì™¸í˜• ì•„ë¬´ê±°ë‚˜ ì„¸íŒ…í•˜ê¸°
+        //ë‚˜ì¤‘ì—” ë¡œë¹„ì—ì„œ ì„¸íŒ…í•œ ê°’ìœ¼ë¡œ ë³´ë‚´ëŠ” ê²ƒìœ¼ë¡œ í•˜ê¸°
+        SendCustom(((CharacterBuilder.PresetList)(Random.Range(1, 17))).ToString());
+
+        //ëœë¤ ìœ„ì¹˜ ì§€ì •
+        curpos = Random.Range(0, MapCotroller.mapSizeX * MapCotroller.mapSizeY - 1);
+
+        DebugLogger.SendDebug(" >>>>>>>>>> " + gameObject.name + " ) " + curpos);
+        SendChange(0, curpos);
+    }
+
     #endregion
 
     #region send & receive
 
     /// <summary>
-    /// º¯°æÁ¡ º¸³»±â
+    /// ë³€ê²½ì  ë³´ë‚´ê¸°
     /// </summary>
     /// <param name="id"></param>
     /// <param name="value"></param>
@@ -146,37 +174,37 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
     }
 
     /// <summary>
-    /// º¯°æÁ¡ º¸³»±â
+    /// ë³€ê²½ì  ë³´ë‚´ê¸°
     /// </summary>
     /// <param name="id"></param>
     /// <param name="value"></param>
     public void SendChange(int id, int value = 0)
     {
-        DebugLogger.SendDebug("SendChange ("+id+"):"+value + " / turn: "+ GameManager.Instance.currTurn);
+        //DebugLogger.SendDebug("SendChange ("+id+"):"+value + " / turn: "+ GameManager.Instance.currTurn);
 
-        //³» ÅÏÀÌ ¾Æ´Ï¶ó¸é ÁøÇàÇÏÁö ¾Ê´Â´Ù. (ÁØºñ´Ü°èÀÎ -1ÀÏ¶© ¹¹µç ¹ŞÀ½)
-        if (GameManager.Instance.currTurn != -1) 
+        //ë‚´ í„´ì´ ì•„ë‹ˆë¼ë©´ ì§„í–‰í•˜ì§€ ì•ŠëŠ”ë‹¤. (ì¤€ë¹„ë‹¨ê³„ì¸ -1ì¼ë• ë­ë“  ë°›ìŒ)
+        if (GameManager.Instance.currTurn > -1 
+            && GameManager.Instance.currTurn != GameManager.Instance.myTurn) 
         {
-            if (GameManager.Instance.currTurn != GameManager.Instance.myTurn) 
-                return;
+            return;
         }
 
-        if (id.Equals(-1))//ÅÏ³Ñ±è
+        if (id.Equals(-1))//í„´ë„˜ê¹€
         {
             DebugLogger.SendDebug("PlayerController : NextTurn" + GameManager.Instance.currTurn+1);
             PV.RPC("ReceivedNextTurn", RpcTarget.All);
         }
-        else if (id.Equals(0))//ÀÌµ¿
+        else if (id.Equals(0))//ì´ë™
         {
             DebugLogger.SendDebug("PlayerController : SendPosition "+value);
             PV.RPC("ReceivedPosition", RpcTarget.All, value);
         }
-        else if (id.Equals(1))//°ø°İ
+        else if (id.Equals(1))//ê³µê²©
         {
             DebugLogger.SendDebug("PlayerController : SendAttack "+value);
             PV.RPC("ReceivedAttack", RpcTarget.All, value);
         }
-        else if (id.Equals(2))//½ºÅ³
+        else if (id.Equals(2))//ìŠ¤í‚¬
         {
             DebugLogger.SendDebug("PlayerController : SendSkill " + value);
             PV.RPC("ReceivedSkill", RpcTarget.All, value);
@@ -185,7 +213,46 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
 
     [PunRPC]
     /// <summary>
-    /// ´ÙÀ½ ÅÏÀ¸·Î ³Ñ±â±â
+    /// í”Œë ˆì´ì–´ ë§ˆë‹¤ ìƒì„±ì´ ì™„ë£Œë  ë•Œ ë³´ë‚¸ë‹¤.
+    /// </summary>
+    public void ReceivedReady()
+    {
+        //í”Œë ˆì´ì–´ë¥¼ ëª¨ë‘ ë‹´ì•„ì¤€ë‹¤.
+        players = FindObjectsOfType<PlayerController>();
+
+        //ëª¨ë“  í”Œë ˆì´ì–´ê°€ ìƒì„± ë˜ì—ˆë‹¤ë©´ ìì‹ ì˜ ì„¸íŒ…ì„ í•´ì¤€ë‹¤.
+        if (players != null && players.Length > 1)
+        {
+            if (isInit) return;
+
+            DebugLogger.SendDebug("ReceivedReady : All ");
+
+            //ê° í”Œë ˆì´ì–´ëŠ” 2ê°œì˜ í”Œë ˆì´ì–´ì»¨íŠ¸ë¡¤ëŸ¬ë¥¼ ê°€ì§€ê³  ìˆê¸° ë•Œë¬¸ì— ëª¨ë‘ ì‹¤í–‰í•´ë²„ë¦¬ë©´ 4ë²ˆ ì§„í–‰ëœë‹¤.
+            //ë°˜ë“œì‹œ ë³¸ì¸ì˜ ê²ƒë§Œ ì‹¤í–‰í•˜ê¸°!
+            LocalInstance.InitPlayer();
+        }
+    }
+
+    [PunRPC]
+    /// <summary>
+    /// ìºë¦­í„° ë³€ê²½ input
+    /// </summary>
+    public void ReceivedCharacter(string value)
+    {
+        DebugLogger.SendDebug("PlayerController : ReceivedCharacter" + value);
+        //if (photonView.IsMine) return;
+
+        //ìºë¦­í„° ë¹Œë”ì— ì˜í•´ ë³€ê²½í•˜ê¸°
+        charBuilder.RebuildToString(value);
+
+        UpdatePlayer();
+
+        GameManager.Instance.AddReadyCount();
+    }
+
+    [PunRPC]
+    /// <summary>
+    /// ë‹¤ìŒ í„´ìœ¼ë¡œ ë„˜ê¸°ê¸°
     /// </summary>
     public void ReceivedNextTurn()
     {
@@ -196,44 +263,30 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
 
     [PunRPC]
     /// <summary>
-    /// Ä³¸¯ÅÍ º¯°æ input
-    /// </summary>
-    public void ReceivedCharacter(string value)
-    {
-        //if (photonView.IsMine) return;
-
-        //Ä³¸¯ÅÍ ºô´õ¿¡ ÀÇÇØ º¯°æÇÏ±â
-        charBuilder.RebuildToString(value);
-
-        UpdatePlayer();
-
-        GameManager.Instance.AddReadyCount();
-    }
-
-    [PunRPC]
-    /// <summary>
-    /// À§Ä¡ º¯°æ (input)
+    /// ìœ„ì¹˜ ë³€ê²½ (input)
     /// </summary>
     public void ReceivedPosition(int index)
     {
+        DebugLogger.SendDebug(" <<<<<<<<<< " + gameObject.name + " ) " + index);
+
         //if (photonView.IsMine) return;
 
-        //°ø°³µÈ »óÅÂ¿¡¼­ ÀÌµ¿ÇßÀ» ¶§ Á¡ÇÁ ÀÌÆåÆ® ¹× ÀÌµ¿ ±â·ÏÀ» ³²±ä´Ù.
-        if (!isMe && isOpen)
+        //ê³µê°œëœ ìƒíƒœì—ì„œ ì´ë™í–ˆì„ ë•Œ ì í”„ ì´í™íŠ¸ ë° ì´ë™ ê¸°ë¡ì„ ë‚¨ê¸´ë‹¤.
+        if (!isMe && IsOpen)
         {
             UIGameManager.Instance.shadowTargetUI.ShowCount(curpos);
             EffectController.Instance.ShowEfx(EffectController.EffectEnum.Jump, transform.position);
-            isOpen = false;
+            IsOpen = false;
         }
 
         curpos = index;
 
         transform.position = MapCotroller.Instance.GetSlotPosition(index);
 
-        //³ª¸¸ º¸´Â ÀÌµ¿ ÈÄ È¿°ú
-        if (isMe || isOpen)
+        //ë‚˜ë§Œ ë³´ëŠ” ì´ë™ í›„ íš¨ê³¼
+        if (isMe || IsOpen)
         {
-            playerAnim.Land(); //Àá±ñ ¿òÃ÷¸®±â
+            playerAnim.Land(); //ì ê¹ ì›€ì¸ ë¦¬ê¸°
             EffectController.Instance.ShowEfx(EffectController.EffectEnum.Smoke, transform.position);
         }
 
@@ -244,33 +297,33 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
 
     [PunRPC]
     /// <summary>
-    /// °ø°İ (input)
+    /// ê³µê²© (input)
     /// </summary>
     public void ReceivedAttack(int index)
     {
         //if (photonView.IsMine) return;
 
-        if (isMe || isOpen)
+        if (isMe || IsOpen)
         {
-            playerAnim.Slash();//°Ë ¹× ½ºÅÂÇÁ ÇüÅÂ
-            //playerAnim.Jab();//ÁÖ¸Ô ¹× ´Ü°Ë ÇüÅÂ
-            //playerAnim.Shot();//¼®±Ã ¹× ÃÑ ÇüÅÂ
-            //°ø°İ È¿°úÀ½
+            playerAnim.Slash();//ê²€ ë° ìŠ¤íƒœí”„ í˜•íƒœ
+            //playerAnim.Jab();//ì£¼ë¨¹ ë° ë‹¨ê²€ í˜•íƒœ
+            //playerAnim.Shot();//ì„ê¶ ë° ì´ í˜•íƒœ
+            //ê³µê²© íš¨ê³¼ìŒ
         }
 
-        //°ø°İ ÀÌÆåÆ®´Â º¸¿©ÁÖ±â
+        //ê³µê²© ì´í™íŠ¸ëŠ” ë³´ì—¬ì£¼ê¸°
         EffectController.Instance.ShowEfx(EffectController.EffectEnum.Hit, MapCotroller.Instance.GetSlotPosition(index));
 
-        //ÇØ´ç À§Ä¡¿¡ ÀÖ´Â ÇÃ·¹ÀÌ¾î´Â °ø°İ´çÇÏ°í °ø°³ÇÑ´Ù.
+        //í•´ë‹¹ ìœ„ì¹˜ì— ìˆëŠ” í”Œë ˆì´ì–´ëŠ” ê³µê²©ë‹¹í•˜ê³  ê³µê°œí•œë‹¤.
         for (int i = 0; i < players.Length; ++i)
         {
             if (players[i].curpos == index) 
             {
-                players[i].isOpen = true;
+                players[i].IsOpen = true;
                 players[i].playerAnim.Hit();
                 players[i].state.GetDamage();
 
-                //³»°¡ ¾Æ´Ñ »óÅÂ°¡ °ø°İ´çÇÏ¸é ÀÌÀü °ø°İÄ«¿îÆ®¸¦ ²¨ÁØ´Ù.
+                //ë‚´ê°€ ì•„ë‹Œ ìƒíƒœê°€ ê³µê²©ë‹¹í•˜ë©´ ì´ì „ ê³µê²©ì¹´ìš´íŠ¸ë¥¼ êº¼ì¤€ë‹¤.
                 if (!players[i].isMe)
                     UIGameManager.Instance.shadowTargetUI.OffCount();
             }
@@ -281,7 +334,7 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
 
     [PunRPC]
     /// <summary>
-    /// ½ºÅ³ »ç¿ë (input)
+    /// ìŠ¤í‚¬ ì‚¬ìš© (input)
     /// </summary>
     public void ReceivedSkill(int index)
     {

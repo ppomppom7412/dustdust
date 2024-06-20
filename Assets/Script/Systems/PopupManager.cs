@@ -4,14 +4,14 @@ using UnityEngine;
 using Singleton;
 
 
-namespace YellowGreen.BackStep
+namespace YellowGreen.Popup
 {
     [System.Serializable]
     public class PopData
     {
-        public bool isBackInput; //¹é¹öÆ° ÀÔ·Â ¹ŞÀ½ ¿©ºÎ (true > onback)
-        public PopupManager.PopState setState; //º¯°æÇÒ »óÅÂ / ³ôÀ»¼ö·Ï ¿ì¼±¼øÀ§¸¦ °¡Áø´Ù.
-        public System.Action<bool> backAct; //¿¹½º¿Í ³ë¿¡ µû¸¥ ´Ù¸¥ Ãâ·Â
+        public bool isBackInput; //ë°±ë²„íŠ¼ ì…ë ¥ ë°›ìŒ ì—¬ë¶€ (true > onback)
+        public PopupManager.PopState setState; //ë³€ê²½í•  ìƒíƒœ / ë†’ì„ìˆ˜ë¡ ìš°ì„ ìˆœìœ„ë¥¼ ê°€ì§„ë‹¤.
+        public System.Action<bool> backAct; //ì˜ˆìŠ¤ì™€ ë…¸ì— ë”°ë¥¸ ë‹¤ë¥¸ ì¶œë ¥
 
         public PopData()
         {
@@ -43,7 +43,7 @@ namespace YellowGreen.BackStep
 
     public class PopupManager : MonoSingleton<PopupManager>
     {
-        //»óÅÂ  /NoneÀº ¾Æ¹« ÆË¾÷ÀÌ ¾øÀ»¶§¸¸ »ç¿ë /Pause½Ã °ÔÀÓÀÌ ¸ØÃç¾ßÇÑ´Ù.
+        //ìƒíƒœ  /Noneì€ ì•„ë¬´ íŒì—…ì´ ì—†ì„ë•Œë§Œ ì‚¬ìš© /Pauseì‹œ ê²Œì„ì´ ë©ˆì¶°ì•¼í•œë‹¤.
         public enum PopState { None, Play, Idle, Stop, Pause }
         PopState currState = PopState.None;
 
@@ -55,16 +55,16 @@ namespace YellowGreen.BackStep
         {
             if (Input.GetKeyUp(KeyCode.Backspace)) 
             {
-                //°ÔÀÓÁ¾·áÃ¢ ¶ç¿ì±â
+                //ê²Œì„ì¢…ë£Œì°½ ë„ìš°ê¸°
                 if ((popupStack ?? new Stack<PopData>()).Count < 1)
                 {
-                    //"PLAY"¿¡¼± Á¦¿Ü
+                    //"PLAY"ì—ì„  ì œì™¸
 
                 }
-                //¹é¹öÆ° ´­¸®±â
+                //ë°±ë²„íŠ¼ ëˆŒë¦¬ê¸°
                 else
                 {
-                    //back¹öÆ°¿¡¸¸ ÀÖ´Â ÀÛµ¿¿©ºÎ
+                    //backë²„íŠ¼ì—ë§Œ ìˆëŠ” ì‘ë™ì—¬ë¶€
                     if (popupStack.Peek().isBackInput)
                         ClosePop();
                 }
@@ -74,7 +74,7 @@ namespace YellowGreen.BackStep
         #region plus mius
 
         /// <summary>
-        /// ÆË¾÷¿¡ µû¸¥ »óÅÂ º¯È­ Àû¿ë
+        /// íŒì—…ì— ë”°ë¥¸ ìƒíƒœ ë³€í™” ì ìš©
         /// </summary>
         /// <param name="state"></param>
         void SetState(PopState state)
@@ -82,29 +82,29 @@ namespace YellowGreen.BackStep
             if (currState.Equals(state))
                 return;
 
-            //»óÀ§ ´Ü°è·Î
+            //ìƒìœ„ ë‹¨ê³„ë¡œ
             if (currState < state)
             {
-                //¸ØÃß±â
+                //ë©ˆì¶”ê¸°
                 if (state.Equals(PopState.Pause))
                     Time.timeScale = 0;
             }
-            //ÇÏÀ§ ´Ü°è·Î
+            //í•˜ìœ„ ë‹¨ê³„ë¡œ
             else if (currState > state)
             {
-                //¸ØÃß±â
+                //ë©ˆì¶”ê¸°
                 if (currState.Equals(PopState.Pause))
                     Time.timeScale = 0;
             }
         }
 
         /// <summary>
-        /// ÆË¾÷ÀÌ ÄÑÁú ¶§ ½×¾ÆµÎ´Â ½ºÅÃ¿¡ Ãß°¡
+        /// íŒì—…ì´ ì¼œì§ˆ ë•Œ ìŒ“ì•„ë‘ëŠ” ìŠ¤íƒì— ì¶”ê°€
         /// </summary>
-        /// <param name="act">´İÈú ¶§ Ãâ·ÂµÇ´Â ¾×¼Ç ±àÁ¤°ú ºÎÁ¤ÀÌ ÀÖ´Ù.</param>
-        /// <param name="state">»óÅÂ¿¡ µû¸¥ º¯°æÁ¡</param>
-        /// <param name="isback">¹é¹öÆ°¿¡ ´ëÇÑ ´ëÀÀ ¿©ºÎ</param>
-        /// <param name="name">»èÁ¦¿¡ ÇÊ¿äÇÑ ÀÌ¸§</param>
+        /// <param name="act">ë‹«í ë•Œ ì¶œë ¥ë˜ëŠ” ì•¡ì…˜ ê¸ì •ê³¼ ë¶€ì •ì´ ìˆë‹¤.</param>
+        /// <param name="state">ìƒíƒœì— ë”°ë¥¸ ë³€ê²½ì </param>
+        /// <param name="isback">ë°±ë²„íŠ¼ì— ëŒ€í•œ ëŒ€ì‘ ì—¬ë¶€</param>
+        /// <param name="name">ì‚­ì œì— í•„ìš”í•œ ì´ë¦„</param>
         public void AddPop(System.Action<bool> act, PopState state, bool isback = true)
         {
             if (popupStack == null)
@@ -112,7 +112,7 @@ namespace YellowGreen.BackStep
 
             PopData newPop = new PopData(act, state, isback);
 
-            //»õ·Î¿î ½ºÅÃÀÌ ±âÁ¸ ½ºÅÃº¸´Ù »óÅÂ°¡ ³·À¸¸é µ¿±âÈ­
+            //ìƒˆë¡œìš´ ìŠ¤íƒì´ ê¸°ì¡´ ìŠ¤íƒë³´ë‹¤ ìƒíƒœê°€ ë‚®ìœ¼ë©´ ë™ê¸°í™”
             if (currState > state)
                 newPop.setState = currState;
 
@@ -123,7 +123,7 @@ namespace YellowGreen.BackStep
         }
 
         /// <summary>
-        ///  ´Ù¸¥ ¹İÀÀÀ» ¸·´Â ¿ëµµ / ¸®¹«¹ö·Î¸¸ Áö¿ï ¼ö ÀÖÀ½
+        ///  ë‹¤ë¥¸ ë°˜ì‘ì„ ë§‰ëŠ” ìš©ë„ / ë¦¬ë¬´ë²„ë¡œë§Œ ì§€ìš¸ ìˆ˜ ìˆìŒ
         /// </summary>
         public void AddInputBlock() 
         {
@@ -136,7 +136,7 @@ namespace YellowGreen.BackStep
         }
 
         /// <summary>
-        /// »ó´Ü ÆË¾÷À» NO·Î ´İ´Ù
+        /// ìƒë‹¨ íŒì—…ì„ NOë¡œ ë‹«ë‹¤
         /// </summary>
         public void ClosePop() 
         {
@@ -149,20 +149,20 @@ namespace YellowGreen.BackStep
             if (popupStack.Count < 1)
                 return;
 
-            //ÀÔ·Â¸·±âÀÎÁö È®ÀÎ
+            //ì…ë ¥ë§‰ê¸°ì¸ì§€ í™•ì¸
             if (blockData != null && popupStack.Peek().Equals(blockData))
                 return;
 
-            //´İ±â ¾×¼Ç ½ÇÇà
+            //ë‹«ê¸° ì•¡ì…˜ ì‹¤í–‰
             popupStack.Pop().backAct(false);
 
-            //³²Àº ½ºÅÃÀÌ ÀÖ°í »óÅÂ°¡ ´Ù¸£´Ù¸é Àû¿ëÇÏ±â
+            //ë‚¨ì€ ìŠ¤íƒì´ ìˆê³  ìƒíƒœê°€ ë‹¤ë¥´ë‹¤ë©´ ì ìš©í•˜ê¸°
             if (popupStack.Count > 0 && currState > popupStack.Peek().setState)
                 SetState(popupStack.Peek().setState);
         }
 
         /// <summary>
-        /// »ó´Ü ÆË¾÷À» Yes·Î ´İ´Ù.
+        /// ìƒë‹¨ íŒì—…ì„ Yesë¡œ ë‹«ë‹¤
         /// </summary>
         public void AccessPop()
         {
@@ -175,20 +175,20 @@ namespace YellowGreen.BackStep
             if (popupStack.Count < 1)
                 return;
 
-            //ÀÔ·Â¸·±âÀÎÁö È®ÀÎ
+            //ì…ë ¥ë§‰ê¸°ì¸ì§€ í™•ì¸
             if (blockData != null && popupStack.Peek().Equals(blockData))
                 return;
 
-            //´İ±â ¾×¼Ç ½ÇÇà
+            //ë‹«ê¸° ì•¡ì…˜ ì‹¤í–‰
             popupStack.Pop().backAct(true);
 
-            //³²Àº ½ºÅÃÀÌ ÀÖ°í »óÅÂ°¡ ´Ù¸£´Ù¸é Àû¿ëÇÏ±â
+            //ë‚¨ì€ ìŠ¤íƒì´ ìˆê³  ìƒíƒœê°€ ë‹¤ë¥´ë‹¤ë©´ ì ìš©í•˜ê¸°
             if (popupStack.Count > 0 && currState > popupStack.Peek().setState)
                 SetState(popupStack.Peek().setState);
         }
 
         /// <summary>
-        /// »ó´Ü ÆË¾÷À» ¾×¼ÇÀ» ½ÇÇàÇÏÁö ¾Ê°í Áö¿ì±â
+        /// ìƒë‹¨ íŒì—…ì„ ì•¡ì…˜ì„ ì‹¤í–‰í•˜ì§€ ì•Šê³  ì§€ìš°ê¸°
         /// </summary>
         public void RemovePop() 
         {
@@ -201,12 +201,41 @@ namespace YellowGreen.BackStep
             if (popupStack.Count < 1)
                 return;
 
-            //´İ±â ¾×¼Ç ½ÇÇà
+            //ë‹«ê¸° ì•¡ì…˜ ì‹¤í–‰
             popupStack.Pop();
 
-            //³²Àº ½ºÅÃÀÌ ÀÖ°í »óÅÂ°¡ ´Ù¸£´Ù¸é Àû¿ëÇÏ±â
+            //ë‚¨ì€ ìŠ¤íƒì´ ìˆê³  ìƒíƒœê°€ ë‹¤ë¥´ë‹¤ë©´ ì ìš©í•˜ê¸°
             if (popupStack.Count > 0 && currState > popupStack.Peek().setState)
                 SetState(popupStack.Peek().setState);
+        }
+
+        /// <summary>
+        /// ë‹«ì„ ìˆ˜ ìˆëŠ” ìƒë‹¨ íŒì—… ëª¨ë‘ NOë¡œ ë‹«ë‹¤
+        /// </summary>
+        public void AllClosePop() 
+        {
+            if (popupStack == null)
+            {
+                popupStack = new Stack<PopData>();
+                return;
+            }
+
+            if (popupStack.Count < 1)
+                return;
+
+            for (int i = popupStack.Count; i > 0; --i) 
+            {
+                //ì…ë ¥ë§‰ê¸°ì¸ì§€ í™•ì¸
+                if (blockData != null && popupStack.Peek().Equals(blockData))
+                    return;
+
+                //ë‹«ê¸° ì•¡ì…˜ ì‹¤í–‰
+                popupStack.Pop().backAct(false);
+
+                //ë‚¨ì€ ìŠ¤íƒì´ ìˆê³  ìƒíƒœê°€ ë‹¤ë¥´ë‹¤ë©´ ì ìš©í•˜ê¸°
+                if (popupStack.Count > 0 && currState > popupStack.Peek().setState)
+                    SetState(popupStack.Peek().setState);
+            }
         }
 
         #endregion

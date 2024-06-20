@@ -9,7 +9,7 @@ public class GameManager : MonoSingleton<GameManager>
 {
     public enum TurnIndex {Skip = -1, Move, Attack, Skill }
 
-    //ÇÃ·¹ÀÌ¾î Àü¿ë ÇÁ¸®ÆÕ
+    //í”Œë ˆì´ì–´ ì „ìš© í”„ë¦¬íŒ¹
     public GameObject playerPrefab;
     public GameObject playerOb;
 
@@ -26,16 +26,16 @@ public class GameManager : MonoSingleton<GameManager>
 
     //private void Start()
     //{
-        //°ÔÀÓ ¾ÀÀ» ºÒ·¯¿À´Â ¹æ½Ä
+        //ê²Œì„ ì”¬ì„ ë¶ˆëŸ¬ì˜¤ëŠ” ë°©ì‹
         //StartGame();
     //}
 
     #endregion
 
     /// <summary>
-    /// °ÔÀÓ ½ÃÀÛ¿¡ ÇÊ¿äÇÑ ÁØºñ ¹× ¼³Á¤
+    /// ê²Œì„ ì‹œì‘ì— í•„ìš”í•œ ì¤€ë¹„ ë° ì„¤ì •
     /// </summary>
-    public void StartGame()
+    public void InitGame()
     {
         UIGameManager.Instance.OpenIngamePanel();
 
@@ -48,54 +48,63 @@ public class GameManager : MonoSingleton<GameManager>
         currTurn = -1;
         actionIndex = -1;
 
-        //³ªÀÇ ÅÏ ¼ø¼­ Ã£±â
+        //ë‚˜ì˜ í„´ ìˆœì„œ ì°¾ê¸°
         for (int i = 0; i < PunManager.Instance.curPlayers.Count; ++i)
         {
             if (PunManager.Instance.curPlayers[i].Equals(PunManager.Instance.myPlayer))
                 myTurn = i;
         }
 
-        //´Ğ³×ÀÓ ¼³Á¤ÇÏ±â
+        //ë‹‰ë„¤ì„ ì„¤ì •í•˜ê¸°
         UIGameManager.Instance.SetNicknameText();
 
         readycount = 0;
     }
 
     /// <summary>
-    /// ¸ğµç ÇÃ·¹ÀÌ¾î ¼¼ÆÃÀÌ ³¡³¯ ¶§
+    /// ëª¨ë“  í”Œë ˆì´ì–´ ì„¸íŒ…ì´ ëë‚  ë•Œ
     /// </summary>
     public void AddReadyCount() 
     {
-        if (currTurn < 0 && ++readycount >= 4)
+        if (currTurn < 0 )
         {
-            //ÅÏ ³Ñ±â±â
-            if (myTurn.Equals(0))
-                PlayerController.LocalInstance.SendChange(-1);
+            //ê¸°ë³¸ì„¸íŒ… 4 ë¡œë”©ì°½ì—ì„œ 1 = ì´5
+            if (++readycount >= 5)
+            {
+                //í„´ ë„˜ê¸°ê¸°
+                if (myTurn.Equals(0))
+                    PlayerController.LocalInstance.SendChange(-1);
 
-            //°¡·Á³ù´ø Ä³¸¯ÅÍ Ç¥±âÇÏ±â
-            PlayerController.LocalInstance.charBuilder.SetAlphaValue(1f);
+                //ê°€ë ¤ë†¨ë˜ ìºë¦­í„° í‘œê¸°í•˜ê¸°
+                PlayerController.LocalInstance.charBuilder.SetAlphaValue(1f);
+            }
         }
     }
 
+    public int GetReadyCount() 
+    {
+        return readycount;
+    }
+
     /// <summary>
-    /// ´Ğ³×ÀÓ ¾ò±â
+    /// ë‹‰ë„¤ì„ ì–»ê¸°
     /// </summary>
     /// <returns></returns>
     public string GetNickname() 
     {
-        //¼­¹ö¿¡ µî·ÏµÈ ´Ğ³×ÀÓ ¹İÈ¯
+        //ì„œë²„ì— ë“±ë¡ëœ ë‹‰ë„¤ì„ ë°˜í™˜
         return PhotonNetwork.NickName;
     }
 
     /// <summary>
-    ///  ´ÙÀ½ ÅÏÀ¸·Î ³Ñ±â±â
+    ///  ë‹¤ìŒ í„´ìœ¼ë¡œ ë„˜ê¸°ê¸°
     /// </summary>
     public void NextTurn()
     {
-        //°ø°İ½Ã µé¾î³µ´ø Ä³¸¯ÅÍ¸¦ ¼û°ÜÁÖ°í
-        //±×¸²ÀÚ¸¦ ³²°Ü 1ºÎÅÍ ½ÃÀÛÇÏ°Ô ÇØÁØ´Ù.
+        //ê³µê²©ì‹œ ë“¤ì–´ë‚¬ë˜ ìºë¦­í„°ë¥¼ ìˆ¨ê²¨ì£¼ê³ 
+        //ê·¸ë¦¼ìë¥¼ ë‚¨ê²¨ 1ë¶€í„° ì‹œì‘í•˜ê²Œ í•´ì¤€ë‹¤.
 
-        //¸ğµç ¹öÆ° ºñÈ°¼ºÈ­
+        //ëª¨ë“  ë²„íŠ¼ ë¹„í™œì„±í™”
         MapCotroller.Instance.OffAllSlot();
 
         currTurn += 1;
@@ -106,7 +115,7 @@ public class GameManager : MonoSingleton<GameManager>
 
         ChangeTurn.Invoke();
 
-        //³» ÅÏ°ú ÇöÀç ÅÏ µ¿ÀÏÇÒ °æ¿ì ÁøÇàÇÏ±â
+        //ë‚´ í„´ê³¼ í˜„ì¬ í„´ ë™ì¼í•  ê²½ìš° ì§„í–‰í•˜ê¸°
         if (currTurn.Equals(myTurn))
         {
             UIGameManager.Instance.skipButton.SetActive(true);
@@ -115,32 +124,32 @@ public class GameManager : MonoSingleton<GameManager>
     }
 
     /// <summary>
-    /// ´ÙÀ½ ¾×¼ÇÀ¸·Î ³Ñ±â±â
+    /// ë‹¤ìŒ ì•¡ì…˜ìœ¼ë¡œ ë„˜ê¸°ê¸°
     /// </summary>
     public void NextAction()
     {
-        //³» ÅÏ°ú ÇöÀç ÅÏ µ¿ÀÏÇÒ °æ¿ì ÁøÇàÇÏ±â
+        //ë‚´ í„´ê³¼ í˜„ì¬ í„´ ë™ì¼í•  ê²½ìš° ì§„í–‰í•˜ê¸°
         if (!currTurn.Equals(myTurn)) return;
 
         UIGameManager.Instance.ShowActionIcon(++actionIndex);
 
         Debug.Log("[On Action] "+actionIndex);
 
-        //³Ñ±â±â¹öÆ° È°¼ºÈ­
+        //ë„˜ê¸°ê¸°ë²„íŠ¼ í™œì„±í™”
         switch (actionIndex) 
             {
-                case 0://ÀÌµ¿
-                //³» À§Ä¡ ±âÁØÀ¸·Î ¹öÆ° ¿­±â
+                case 0://ì´ë™
+                //ë‚´ ìœ„ì¹˜ ê¸°ì¤€ìœ¼ë¡œ ë²„íŠ¼ ì—´ê¸°
                 MapCotroller.Instance.OnSlots(PlayerController.LocalInstance.curpos, MapCotroller.SlotShape.Around1);
                     break;
 
-                case 1://°ø°İ
-                //³» À§Ä¡ »©°í ÀüÃ¼ ¹öÆ° ¿­±â
+                case 1://ê³µê²©
+                //ë‚´ ìœ„ì¹˜ ë¹¼ê³  ì „ì²´ ë²„íŠ¼ ì—´ê¸°
                 MapCotroller.Instance.OnSlots(PlayerController.LocalInstance.curpos, MapCotroller.SlotShape.All);
                     break;
 
-                case 2://½ºÅ³                
-                //°¡Áø ½ºÅ³À» ±â¹İÀ¸·Î »ç¿ë¿©ºÎ Ã¼Å©
+                case 2://ìŠ¤í‚¬                
+                //ê°€ì§„ ìŠ¤í‚¬ì„ ê¸°ë°˜ìœ¼ë¡œ ì‚¬ìš©ì—¬ë¶€ ì²´í¬
                 MapCotroller.Instance.OnSlots(PlayerController.LocalInstance.curpos, MapCotroller.SlotShape.Random);
                     break;
             }
@@ -148,22 +157,22 @@ public class GameManager : MonoSingleton<GameManager>
     }
 
     /// <summary>
-    /// ¹Ş¾Æ¿Â °ª Àû¿ëÇÏ±â
+    /// ë°›ì•„ì˜¨ ê°’ ì ìš©í•˜ê¸°
     /// </summary>
     /// <param name="value"></param>
     public void Action(int value) 
     {
-        //³» ÅÏ°ú ÇöÀç ÅÏ µ¿ÀÏÇÒ °æ¿ì ÁøÇàÇÏ±â
+        //ë‚´ í„´ê³¼ í˜„ì¬ í„´ ë™ì¼í•  ê²½ìš° ì§„í–‰í•˜ê¸°
         if (!currTurn.Equals(myTurn)) return;
 
         if (value.Equals(-1))
         {
-            //ÅÏ ³Ñ±â±â
+            //í„´ ë„˜ê¸°ê¸°
             PlayerController.LocalInstance.SendChange(-1);
         }
         else if (actionIndex.Equals(2))
         {
-            //½ºÅ³ ±¸Çö
+            //ìŠ¤í‚¬ êµ¬í˜„
         }
         else 
         {

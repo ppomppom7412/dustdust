@@ -32,7 +32,7 @@ public class TweenPosition : TweenAnimation
                     if (endEvent != null)
                         endEvent.Invoke();
                 });
-        }
+        } 
         else 
         {
             transform.position = startPosition;
