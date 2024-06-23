@@ -7,30 +7,18 @@ using Photon.Pun;
 
 public class GameManager : MonoSingleton<GameManager>
 {
-    public enum TurnIndex {Skip = -1, Move, Attack, Skill }
-
     //플레이어 전용 프리팹
     public GameObject playerPrefab;
     public GameObject playerOb;
 
     public int currTurn = 0;
     public int myTurn = 0;
-    public int actionIndex = 0;
+    public int actionIndex = 0; //Skip -1, Move 0, Attack 1, Skill 2
     const int maxTurn = 2;
     int readycount = 0;
-    public const int waittime = 20;
+    public const int waittime = 31;
 
     public UnityEngine.Events.UnityEvent ChangeTurn;
-
-    #region MonoBehaviour func
-
-    //private void Start()
-    //{
-        //게임 씬을 불러오는 방식
-        //StartGame();
-    //}
-
-    #endregion
 
     /// <summary>
     /// 게임 시작에 필요한 준비 및 설정
@@ -59,6 +47,12 @@ public class GameManager : MonoSingleton<GameManager>
         UIGameManager.Instance.SetNicknameText();
 
         readycount = 0;
+
+        //슬롯 데미지 초기화
+        MapCotroller.Instance.ClearDamageSlots();
+
+        //모든 버튼 비활성화
+        MapCotroller.Instance.OffAllSlot();
     }
 
     /// <summary>
@@ -73,7 +67,7 @@ public class GameManager : MonoSingleton<GameManager>
             {
                 //턴 넘기기
                 if (myTurn.Equals(0))
-                    PlayerController.LocalInstance.SendChange(-1);
+                    PlayerController.LocalInstance.SendAction(-1);
 
                 //가려놨던 캐릭터 표기하기
                 PlayerController.LocalInstance.charBuilder.SetAlphaValue(1f);
@@ -81,19 +75,13 @@ public class GameManager : MonoSingleton<GameManager>
         }
     }
 
+    /// <summary>
+    /// 세팅 확인
+    /// </summary>
+    /// <returns></returns>
     public int GetReadyCount() 
     {
         return readycount;
-    }
-
-    /// <summary>
-    /// 닉네임 얻기
-    /// </summary>
-    /// <returns></returns>
-    public string GetNickname() 
-    {
-        //서버에 등록된 닉네임 반환
-        return PhotonNetwork.NickName;
     }
 
     /// <summary>
@@ -117,10 +105,7 @@ public class GameManager : MonoSingleton<GameManager>
 
         //내 턴과 현재 턴 동일할 경우 진행하기
         if (currTurn.Equals(myTurn))
-        {
-            UIGameManager.Instance.skipButton.SetActive(true);
-            NextAction();
-        }
+            Invoke("NextAction", 1f);//NextAction();
     }
 
     /// <summary>
@@ -131,6 +116,7 @@ public class GameManager : MonoSingleton<GameManager>
         //내 턴과 현재 턴 동일할 경우 진행하기
         if (!currTurn.Equals(myTurn)) return;
 
+        UIGameManager.Instance.skipButton.SetActive(true);
         UIGameManager.Instance.ShowActionIcon(++actionIndex);
 
         Debug.Log("[On Action] "+actionIndex);
@@ -140,7 +126,7 @@ public class GameManager : MonoSingleton<GameManager>
             {
                 case 0://이동
                 //내 위치 기준으로 버튼 열기
-                MapCotroller.Instance.OnSlots(PlayerController.LocalInstance.curpos, MapCotroller.SlotShape.Around1);
+                MapCotroller.Instance.OnSlots(PlayerController.LocalInstance.curpos, MapCotroller.SlotShape.Cross);
                     break;
 
                 case 1://공격
@@ -150,7 +136,7 @@ public class GameManager : MonoSingleton<GameManager>
 
                 case 2://스킬                
                 //가진 스킬을 기반으로 사용여부 체크
-                MapCotroller.Instance.OnSlots(PlayerController.LocalInstance.curpos, MapCotroller.SlotShape.Random);
+                MapCotroller.Instance.OnSlots(PlayerController.LocalInstance.curpos, MapCotroller.SlotShape.Around1);
                     break;
             }
         
@@ -165,19 +151,19 @@ public class GameManager : MonoSingleton<GameManager>
         //내 턴과 현재 턴 동일할 경우 진행하기
         if (!currTurn.Equals(myTurn)) return;
 
+        UIGameManager.Instance.skipButton.SetActive(false);
+
         if (value.Equals(-1))
         {
             //턴 넘기기
-            PlayerController.LocalInstance.SendChange(-1);
-        }
-        else if (actionIndex.Equals(2))
-        {
-            //스킬 구현
+            PlayerController.LocalInstance.SendAction(-1);
         }
         else 
         {
-            PlayerController.LocalInstance.SendChange(actionIndex, value);
-            NextAction();
+            PlayerController.LocalInstance.SendAction(actionIndex, value);
+
+            if (actionIndex < 2)
+                Invoke("NextAction", 1f);
         }
     }
 

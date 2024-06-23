@@ -48,6 +48,29 @@ public class MapCotroller : MonoSingleton<MapCotroller>
         GameManager.Instance.Action(callIndex);
     }
 
+    /// <summary>
+    /// 슬롯에 데미지 효과 주기
+    /// </summary>
+    /// <param name="index"></param>
+    public void SetSlotDamage(int index) 
+    {
+        if (index < 0)
+            index = 0;
+        else if (index >= allSlot.Count)
+            index = allSlot.Count - 1;
+
+        allSlot[index].OnDamage();
+    }
+
+    /// <summary>
+    /// 모든 슬롯에 있는 데미지 초기화
+    /// </summary>
+    public void ClearDamageSlots() 
+    {
+        for (int i = 0; i < allSlot.Count; ++i)
+            allSlot[i].ResetDamage();
+    }
+
     #region slot func
 
     public enum SlotShape { Target, Cross, Around1, Around2, Around3, All, NotTarget, Random }

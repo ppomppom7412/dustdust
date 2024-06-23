@@ -625,6 +625,11 @@ MonoBehaviour:
   slotBtn: {fileID: 186395200510207155}
   slottext: {fileID: 660598783600884943}
   crackTwImg: {fileID: 1754012708623839976}
+  passages:
+  - {fileID: 8843683069546646377}
+  - {fileID: 1510174503496279959}
+  - {fileID: 566040785772905430}
+  - {fileID: 4141196214569251439}
   mapPoint: {x: 0, y: 0}
   slotindex: 0
   damge: 0
@@ -1115,7 +1120,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.23584908, g: 0.11559842, b: 0.0745372, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 0
@@ -1144,9 +1149,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c9dcc6fedc7eac4680e94ac24aff6e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  duration: 0.5
   loopCount: 1
   loopType: 0
-  duration: 0.5
   tweenCurve:
     serializedVersion: 2
     m_Curve:

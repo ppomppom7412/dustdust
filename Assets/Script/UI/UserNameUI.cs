@@ -1,16 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
+
 using UnityEngine;
 using UnityEngine.UI;
 
+using DG.Tweening;
+
 public class UserNameUI : MonoBehaviour
 {
-
     [Header("UIs")]
-    public GameObject turnObject;   //³ªÀÇ ÅÏ Ç¥±â
+    public GameObject turnObject;   //ë‚˜ì˜ í„´ í‘œê¸°
     public Text nameText;
     public Image[] heathImages;
     public Image[] manaImages;
+
+    [Header("Sprite")]
+    public ImageLibraryAnimator animator;
+    public CharacterSpriteBulider builder;
+    public Sprite defaultSprite;
 
     [Header("Colors")]
     public Color noneColor;
@@ -18,8 +25,11 @@ public class UserNameUI : MonoBehaviour
     public Color heathColor;
     public Color shieldColor;
 
+    Tween damageTwn;
+    Tween hurtTwn;
+
     /// <summary>
-    /// ÃÊ±â »óÅÂ·Î ¼¼ÆÃ
+    /// ì´ˆê¸° ìƒíƒœë¡œ ì„¸íŒ…
     /// </summary>
     public void InitState() 
     {
@@ -32,10 +42,12 @@ public class UserNameUI : MonoBehaviour
         {
             heathImages[m].color = heathColor;
         }
+
+        animator.image.sprite = defaultSprite;
     }
 
     /// <summary>
-    /// »óÅÂ¿¡ µû¸¥ Ç¥±â º¯È­
+    /// ìƒíƒœì— ë”°ë¥¸ í‘œê¸° ë³€í™”
     /// </summary>
     /// <param name="state"></param>
     public void SyncState(PlayerState state)
@@ -64,7 +76,7 @@ public class UserNameUI : MonoBehaviour
     }
 
     /// <summary>
-    /// À¯Àú³×ÀÓÄ«µåÀÇ ÃÊ±â ¼³Á¤
+    /// ìœ ì €ë„¤ì„ì¹´ë“œì˜ ì´ˆê¸° ì„¤ì •
     /// </summary>
     /// <param name="name"></param>
     /// <param name="is_me"></param>
@@ -80,7 +92,7 @@ public class UserNameUI : MonoBehaviour
     }
 
     /// <summary>
-    /// À¯Àú³×ÀÓÄ«µåÀÇ ÅÏ Ç¥±â ¼³Á¤
+    /// ìœ ì €ë„¤ì„ì¹´ë“œì˜ í„´ í‘œê¸° ì„¤ì •
     /// </summary>
     /// <param name="myturn"></param>
     public void SetTurn(bool myturn) 
@@ -88,4 +100,64 @@ public class UserNameUI : MonoBehaviour
         turnObject.SetActive(myturn);
     }
 
+    /// <summary>
+    /// í•˜íŠ¸(ì²´ë ¥UI) í”ë“¤ê¸°
+    /// </summary>
+    /// <param name="index"></param>
+    public void ShakeHeart(int index) 
+    {
+        //ê¸°ì¡´ì— ì§„í–‰í•˜ë˜ ê²ƒì´ ìˆìœ¼ë©´ ì¢…ë£Œìœ„ì¹˜ë¡œ ì´ë™í•˜ê¸°
+        if (damageTwn != null)
+            damageTwn.Kill(true);
+
+        if (index < 0)
+            index = 0;
+        else if (index >= heathImages.Length)
+            index = heathImages.Length-1;
+
+        Vector3 uppos = heathImages[index].transform.position + (Vector3.up * 0.1f);
+
+        damageTwn = DOTween.To(
+            () => heathImages[index].transform.position,
+            movepos => heathImages[index].transform.position = movepos
+            , uppos, 0.1f)
+            .SetLoops(2, LoopType.Yoyo);
+    }
+
+    /// <summary>
+    /// ë°ì´í„° ê¸°ë°˜ìœ¼ë¡œ í”„ë¡œí•„ ìºë¦­í„° ë³€ê²½
+    /// </summary>
+    /// <param name="data"></param>
+    public void SetProfileCharacter(string data) 
+    {
+        builder.RebuildToString(data);
+    }
+
+    /// <summary>
+    /// í”„ë¡œí•„ ìºë¦­í„° ì• ë‹ˆë©”ì´ì…˜ ì¶œë ¥
+    /// </summary>
+    /// <param name="motion"></param>
+    public void PlayAnim(ImageLibraryAnimator.MotionList motion) 
+    {
+        if (motion.Equals(ImageLibraryAnimator.MotionList.Death))
+        {
+            animator.PlayAnim(motion.ToString(), false, 10f, 0.2f, false);
+        }
+        else if (motion.Equals(ImageLibraryAnimator.MotionList.Hurt)) 
+        {
+            if (hurtTwn != null)
+                hurtTwn.Kill(true);
+
+            animator.image.color = Color.white;
+            hurtTwn = DOTween.To(() => animator.image.color, redcolor => animator.image.color = redcolor, Color.red, 0.2f).SetLoops(2, LoopType.Yoyo);
+        }
+        else if (motion.Equals(ImageLibraryAnimator.MotionList.Run) || motion.Equals(ImageLibraryAnimator.MotionList.Roll) )
+        {
+            animator.PlayAnim(motion.ToString(), true, 3f, 0.2f, true);
+        }
+        else
+        {
+            animator.PlayAnim(motion.ToString());
+        }
+    }
 }

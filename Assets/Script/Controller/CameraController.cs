@@ -6,7 +6,6 @@ using DG.Tweening;
 
 public class CameraController : MonoSingleton<CameraController>
 {
-    [SerializeField] Camera camera;
     public Vector3 defalutPosition = new Vector3(0f, 1f, -10f);
 
     [Header("Move&Zoom")]
@@ -48,7 +47,7 @@ public class CameraController : MonoSingleton<CameraController>
     public void ResetCamera() 
     {
         transform.position = defalutPosition;
-        camera.orthographicSize = defaultZoom;
+        Camera.main.orthographicSize = defaultZoom;
         curBox = (1-(defaultZoom - minZoom) / (maxZoom - minZoom)) * moveBox;
     }
 
@@ -69,14 +68,14 @@ public class CameraController : MonoSingleton<CameraController>
     /// <param name="delta"></param>
     public void Zoom(float delta)
     {
-        curBox = camera.orthographicSize + delta;
+        curBox = Camera.main.orthographicSize + delta;
 
         if (curBox < minZoom)
             curBox = minZoom;
         else if (curBox > maxZoom)
             curBox = maxZoom;
 
-        camera.orthographicSize = curBox;
+        Camera.main.orthographicSize = curBox;
 
         //0~1f사이의 현재 줌 사이즈 * 최대 이동 위치
         curBox = (1-(curBox - minZoom) / (maxZoom - minZoom)) * moveBox;

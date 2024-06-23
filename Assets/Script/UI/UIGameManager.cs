@@ -28,6 +28,7 @@ public class UIGameManager : MonoSingleton<UIGameManager>
     public CountDownUI countDwUI;
     public GameObject skipButton;
     public GameObject myTurnUI;
+    public GameObject hurtAnimUI;
     public GameObject[] actIcons;
 
     [Header("Loading UI")]
@@ -220,6 +221,12 @@ public class UIGameManager : MonoSingleton<UIGameManager>
             else
                 actIcons[i].SetActive(false);
         }
+    }
+
+    public void HurtEffect() 
+    {
+        hurtAnimUI.SetActive(false);
+        hurtAnimUI.SetActive(true);
     }
 
     #endregion

@@ -130,9 +130,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa3073a673f18154ba4da41d3b555c7c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  duration: 0.5
   loopCount: -1
   loopType: 1
-  duration: 0.5
   tweenCurve:
     serializedVersion: 2
     m_Curve:
@@ -293,7 +293,7 @@ GameObject:
   - component: {fileID: 623786650722701412}
   - component: {fileID: 2322775410393512467}
   m_Layer: 0
-  m_Name: player
+  m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -329,14 +329,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PV: {fileID: 2322775410393512467}
-  players: []
   isMe: 0
   curpos: 0
-  isOpen: 0
   isInit: 0
   playerAnim: {fileID: 805754593778945862}
   charBuilder: {fileID: 8040323894333085404}
   meMarker: {fileID: 4630175985651471743}
+  userUi: {fileID: 0}
 --- !u!114 &8040323894333085405
 MonoBehaviour:
   m_ObjectHideFlags: 0

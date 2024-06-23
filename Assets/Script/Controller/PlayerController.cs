@@ -13,8 +13,8 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
 {
     //본인 오브젝트 확인용
     public static PlayerController LocalInstance;
+    public static PlayerController[] players;
     public PhotonView PV; //이벤트 송수신 //이거 없인 생성이 안됨 ㅠ
-    public PlayerController[] players;
 
     [Header("data")]
     public bool isMe = false;
@@ -25,7 +25,7 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
         set {
             isOpen = value;
 
-            if (isOpen)
+            if (isOpen || isMe)
                 charBuilder.SetAlphaValue(1);
             else
                 charBuilder.SetAlphaValue(0);
@@ -33,13 +33,18 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
 
         get { return isOpen; }
     }
-    public bool isInit = false;
+    //public bool isInit = false;
     public PlayerState state;
+
+    Vector3 rightScale = new Vector3(0.5f, 0.5f, 1f);
+    Vector3 leftScale = new Vector3(-0.5f, 0.5f, 1f);
+    IEnumerator moveRoutine;
 
     [Header("Object")]
     public CharacterAnimation playerAnim;
     public CharacterBuilder charBuilder;
     public GameObject meMarker;
+    public UserNameUI userUi;
 
     #region MonoBehaviour
 
@@ -61,22 +66,26 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
     {
         //셋업 전까진 안보이게 하자
         charBuilder.SetAlphaValue(0);
-
+        meMarker.SetActive(false);
         state.Init();
 
-        isInit = false;
+        //isInit = false;
 
         if (LocalInstance == this)
         {
             isMe = true;
             gameObject.name = PunManager.Instance.myPlayer.NickName;
+            userUi = UIGameManager.Instance.userCardMe;
 
             //Send Ready GameScene
             PV.RPC("ReceivedReady", RpcTarget.All);
+
         }
         else
         {
             isMe = false;
+            userUi = UIGameManager.Instance.userCardOther;
+
             for (int i = 0; i < PunManager.Instance.curPlayers.Count; ++i)
             {
                 if (PunManager.Instance.curPlayers[i] != PunManager.Instance.myPlayer)
@@ -89,73 +98,112 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
 
     #endregion
 
-    #region IPunObservable implementation
-
-    ///// <summary>
-    ///// 받거나 보내기
-    ///// </summary>
-    ///// <param name="stream"></param>
-    ///// <param name="info"></param>
-    //public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-    //{
-    //    if (stream.IsWriting)
-    //    {
-    //        DebugLogger.SendDebug("PlayerController : Send Next()");
-
-    //        //우리는 이 플레이어를 소유하고 있습니다:
-    //        //다른 플레이어에게 데이터를 보냅니다.
-    //        stream.SendNext(curpos);
-    //        stream.SendNext(myCharID);
-    //    }
-    //    else
-    //    {
-    //        DebugLogger.SendDebug("PlayerController : Receive Next()");
-
-    //        // 네트워크 플레이어, 데이터 수신
-    //        this.curpos = (Vector2)stream.ReceiveNext();
-    //        this.myCharID = (int)stream.ReceiveNext();
-
-    //        UpdatePlayer();
-    //    }
-    //}
-
-    #endregion
-
     #region main func
-
-    /// <summary>
-    /// 서버에서 보낸 것을 기반으로 변경한다.
-    /// </summary>
-    void UpdatePlayer()
-    {
-        //UI 동기화
-        for (int i = 0; i < players.Length; ++i)
-        {
-            if (players[i].isMe)
-                UIGameManager.Instance.userCardMe.SyncState(players[i].state);
-            else
-                UIGameManager.Instance.userCardOther.SyncState(players[i].state);
-        }
-    }
 
     /// <summary>
     /// 초기 위치 및 플레이어 세팅
     /// </summary>
     void InitPlayer() 
     {
-        isInit = true;
+        //isInit = true;
 
         meMarker.SetActive(isMe);
 
         //프리팹 외형 아무거나 세팅하기
         //나중엔 로비에서 세팅한 값으로 보내는 것으로 하기
-        SendCustom(((CharacterBuilder.PresetList)(Random.Range(1, 17))).ToString());
+        PV.RPC("ReceivedCharacter", RpcTarget.All, ((PresetList)(Random.Range(1, 17))).ToString());
 
         //랜덤 위치 지정
-        curpos = Random.Range(0, MapCotroller.mapSizeX * MapCotroller.mapSizeY - 1);
+        PV.RPC("ReceivedPosition", RpcTarget.All, MapCotroller.mapSizeX * MapCotroller.mapSizeY - 1);
+    }
 
-        DebugLogger.SendDebug(" >>>>>>>>>> " + gameObject.name + " ) " + curpos);
-        SendChange(0, curpos);
+    /// <summary>
+    /// 데미지 받기
+    /// </summary>
+    public void Damaged() 
+    {
+        //해당 위치에 있는 플레이어는 공격당하고 공개한다.
+        IsOpen = true;
+
+        if (isMe)
+            UIGameManager.Instance.HurtEffect();
+
+        //애님 효과주기
+        playerAnim.Hit();
+        EffectController.Instance.ShowSfx(EffectController.SoundEnum.Hit, transform.position);
+        userUi.PlayAnim(ImageLibraryAnimator.MotionList.Hurt);
+        userUi.ShakeHeart(state.curHp);
+
+        //데미지 처리 및 싱크
+        state.GetDamage();
+        userUi.SyncState(state);
+    }
+
+    IEnumerator WalkPlayer(MapSlot prev_slot, MapSlot dest_slot, float movetime) 
+    {   
+        float time = 0f;
+        int passagestep = 0;
+
+        //방향 지정
+        if (prev_slot.mapPoint.x < dest_slot.mapPoint.x)
+            transform.localScale = rightScale;
+        else if (prev_slot.mapPoint.x > dest_slot.mapPoint.x)
+            transform.localScale = leftScale;
+
+        //상하 좌우 모션 결정
+        if ((prev_slot.mapPoint - dest_slot.mapPoint).x == 0)
+        {
+            playerAnim.Climb();
+            userUi.PlayAnim(ImageLibraryAnimator.MotionList.Climb);
+        }
+        else
+        {
+            playerAnim.Run();
+            userUi.PlayAnim(ImageLibraryAnimator.MotionList.Run);
+        }
+
+        while (time < movetime) 
+        {
+            transform.position = Vector3.Lerp(prev_slot.transform.position, dest_slot.transform.position, time / movetime);
+            time += Time.deltaTime;
+
+            if (passagestep.Equals(0) && time / movetime >= 0.1f)
+            {
+                //이동 통로 열기
+                if (isOpen)
+                    prev_slot.OpenPassage(dest_slot.mapPoint - prev_slot.mapPoint);
+                passagestep += 1;
+            }
+            else if (passagestep.Equals(1) && time / movetime >= 0.3f)
+            {
+                //도착 통로 열기
+                dest_slot.OpenPassage(prev_slot.mapPoint - dest_slot.mapPoint);
+                passagestep += 1;
+            }
+            else if (passagestep.Equals(2) && time / movetime >= 0.5f)
+            {
+                //비공개 > 공개시 
+                if (prev_slot.damge <= 0 && dest_slot.damge > 0)
+                    IsOpen = true;
+            }
+            else if (passagestep.Equals(3) && time / movetime >= 0.7f) 
+            {
+                //이전 통로 닫기
+                prev_slot.AllClosePassage();
+                passagestep += 1;
+            }
+            else if (passagestep.Equals(4) && time / movetime >= 0.9f)
+            {
+                //도착 통로 닫기
+                dest_slot.AllClosePassage();
+                passagestep += 1;
+            }
+
+            yield return null;
+        }
+
+        playerAnim.Idle();
+        userUi.PlayAnim(ImageLibraryAnimator.MotionList.Idle);
     }
 
     #endregion
@@ -167,18 +215,7 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
     /// </summary>
     /// <param name="id"></param>
     /// <param name="value"></param>
-    public void SendCustom(string value = "")
-    {
-        DebugLogger.SendDebug("PlayerController : SendCharacter "+value);
-        PV.RPC("ReceivedCharacter", RpcTarget.All, value);
-    }
-
-    /// <summary>
-    /// 변경점 보내기
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="value"></param>
-    public void SendChange(int id, int value = 0)
+    public void SendAction(int id, int value = 0)
     {
         //DebugLogger.SendDebug("SendChange ("+id+"):"+value + " / turn: "+ GameManager.Instance.currTurn);
 
@@ -197,7 +234,7 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
         else if (id.Equals(0))//이동
         {
             DebugLogger.SendDebug("PlayerController : SendPosition "+value);
-            PV.RPC("ReceivedPosition", RpcTarget.All, value);
+            PV.RPC("ReceivedMove", RpcTarget.All, value);
         }
         else if (id.Equals(1))//공격
         {
@@ -223,7 +260,7 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
         //모든 플레이어가 생성 되었다면 자신의 세팅을 해준다.
         if (players != null && players.Length > 1)
         {
-            if (isInit) return;
+            //if (isInit) return;
 
             DebugLogger.SendDebug("ReceivedReady : All ");
 
@@ -235,7 +272,7 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
 
     [PunRPC]
     /// <summary>
-    /// 캐릭터 변경 input
+    /// 캐릭터 변경 (init)
     /// </summary>
     public void ReceivedCharacter(string value)
     {
@@ -244,10 +281,21 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
 
         //캐릭터 빌더에 의해 변경하기
         charBuilder.RebuildToString(value);
-
-        UpdatePlayer();
+        userUi.SetProfileCharacter(value);
+        userUi.PlayAnim(ImageLibraryAnimator.MotionList.Idle);
 
         GameManager.Instance.AddReadyCount();
+    }
+
+    [PunRPC]
+    /// <summary>
+    /// 위치 변경 (init)
+    /// </summary>
+    public void ReceivedPosition(int index)
+    {
+        GameManager.Instance.AddReadyCount();
+        curpos = index;
+        transform.position = MapCotroller.Instance.GetSlotPosition(index);
     }
 
     [PunRPC]
@@ -263,36 +311,58 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
 
     [PunRPC]
     /// <summary>
-    /// 위치 변경 (input)
+    /// 캐릭터 이동 (input)
     /// </summary>
-    public void ReceivedPosition(int index)
+    public void ReceivedMove(int index)
     {
-        DebugLogger.SendDebug(" <<<<<<<<<< " + gameObject.name + " ) " + index);
-
         //if (photonView.IsMine) return;
 
-        //공개된 상태에서 이동했을 때 점프 이펙트 및 이동 기록을 남긴다.
-        if (!isMe && IsOpen)
-        {
-            UIGameManager.Instance.shadowTargetUI.ShowCount(curpos);
-            EffectController.Instance.ShowEfx(EffectController.EffectEnum.Jump, transform.position);
-            IsOpen = false;
-        }
+        MapSlot prev_slot = MapCotroller.Instance.ExistTargetSlot(MapCotroller.GetMapPoint(0, curpos));
+        MapSlot dest_slot = MapCotroller.Instance.ExistTargetSlot(MapCotroller.GetMapPoint(0, index));
+
+        //이동 연출 멈추기
+        if (moveRoutine != null)
+            StopCoroutine(moveRoutine);
+        transform.position = MapCotroller.Instance.GetSlotPosition(curpos);
 
         curpos = index;
 
-        transform.position = MapCotroller.Instance.GetSlotPosition(index);
-
-        //나만 보는 이동 후 효과
-        if (isMe || IsOpen)
+        //'나'이거나 / 비공개 > 공개 / 공개 > 공개
+        if (isMe 
+            || (prev_slot.damge <= 0 && dest_slot.damge > 0) 
+            || (prev_slot.damge > 0 && dest_slot.damge > 0))
         {
-            playerAnim.Land(); //잠깐 움츠리기
-            EffectController.Instance.ShowEfx(EffectController.EffectEnum.Smoke, transform.position);
+            // 이동 연출하기
+            moveRoutine = WalkPlayer(prev_slot, dest_slot, 1f);
+            StartCoroutine(moveRoutine);
         }
+        //공개 > 비공개
+        else if ((prev_slot.damge > 0 && dest_slot.damge <= 0)) 
+        {
+            IsOpen = false;
 
-        //UpdatePlayer();
+            playerAnim.Jump();
+            userUi.PlayAnim(ImageLibraryAnimator.MotionList.Jump);
+            EffectController.Instance.ShowSfx(EffectController.SoundEnum.Smoke, transform.position);
 
-        GameManager.Instance.AddReadyCount();
+            //이동 전 퐁
+            EffectController.Instance.ShowEfx(EffectController.EffectEnum.Jump, transform.position);
+
+            transform.position = MapCotroller.Instance.GetSlotPosition(index);
+
+            //이동 후 퐁
+            if (isMe)
+                EffectController.Instance.ShowEfx(EffectController.EffectEnum.Smoke, transform.position);
+        }
+        //비공개 > 비공개
+        else if ((prev_slot.damge <= 0 && dest_slot.damge <= 0))
+        {
+            playerAnim.Jump();
+            userUi.PlayAnim(ImageLibraryAnimator.MotionList.Jump);
+            EffectController.Instance.ShowSfx(EffectController.SoundEnum.Smoke, transform.position);
+
+            transform.position = MapCotroller.Instance.GetSlotPosition(index);
+        }
     }
 
     [PunRPC]
@@ -303,33 +373,16 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
     {
         //if (photonView.IsMine) return;
 
-        if (isMe || IsOpen)
-        {
-            playerAnim.Slash();//검 및 스태프 형태
-            //playerAnim.Jab();//주먹 및 단검 형태
-            //playerAnim.Shot();//석궁 및 총 형태
-            //공격 효과음
-        }
+        //무기에 따라 변경하는 것 추가해야함.... @@@@
+        userUi.PlayAnim(ImageLibraryAnimator.MotionList.Slash);
+        playerAnim.Slash();//검 및 스태프 형태
+        //playerAnim.Jab();//주먹 및 단검 형태
+        //playerAnim.Shot();//석궁 및 총 형태
 
         //공격 이펙트는 보여주기
         EffectController.Instance.ShowEfx(EffectController.EffectEnum.Hit, MapCotroller.Instance.GetSlotPosition(index));
-
-        //해당 위치에 있는 플레이어는 공격당하고 공개한다.
-        for (int i = 0; i < players.Length; ++i)
-        {
-            if (players[i].curpos == index) 
-            {
-                players[i].IsOpen = true;
-                players[i].playerAnim.Hit();
-                players[i].state.GetDamage();
-
-                //내가 아닌 상태가 공격당하면 이전 공격카운트를 꺼준다.
-                if (!players[i].isMe)
-                    UIGameManager.Instance.shadowTargetUI.OffCount();
-            }
-        }
-
-        UpdatePlayer();
+        CameraController.Instance.VerticalVibration(3,0.1f,0.2f);
+        MapCotroller.Instance.SetSlotDamage(index);
     }
 
     [PunRPC]
@@ -340,8 +393,12 @@ public class PlayerController : MonoBehaviourPunCallbacks //, IPunObservable
     {
         //if (photonView.IsMine) return;
 
-        //SetPosition(index);
-        UpdatePlayer();
+        //데미지를 줬으면 싱크를 해줘야함!!
+        //players[i].state.GetDamage();
+        //players[i].userUi.SyncState(players[i].state);
+
+        //스킬 미구현이라서 턴 넘기는 것으로 고정
+        GameManager.Instance.NextTurn();
     }
 
     #endregion

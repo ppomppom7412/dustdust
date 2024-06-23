@@ -4,7 +4,6 @@ using Assets.PixelFantasy.PixelHeroes.Common.Scripts.CollectionScripts;
 using Assets.PixelFantasy.PixelHeroes.Common.Scripts.Utils;
 using UnityEngine;
 
-
 namespace Assets.PixelFantasy.PixelHeroes.Common.Scripts.CharacterScripts
 {
     public class CharacterBuilder : MonoBehaviour
@@ -29,8 +28,6 @@ namespace Assets.PixelFantasy.PixelHeroes.Common.Scripts.CharacterScripts
         public Texture2D Texture { get; private set; }
         private Dictionary<string, Sprite> _sprites;
 
-        //종족 리스트
-        public enum PresetList { None, Human, Elf, DarkElf, Demon, Goblin, Orc, Lizard, FireLizard, ZombieA, ZombieB, Skeleton, Vampire, Demigod, Merman, Furry, Werewolf, Max };
 
         public void Awake()
         {

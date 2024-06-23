@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Assets.PixelFantasy.Common.Scripts;
 using Assets.PixelFantasy.PixelHeroes.Common.Scripts.CharacterScripts;
 using UnityEngine;
@@ -9,10 +9,25 @@ namespace Assets.PixelFantasy.PixelHeroes.Common.Scripts.ExampleScripts
     public class CharacterAnimation : MonoBehaviour
     {
         private Character _character;
-        
+
         public void Start()
         {
             _character = GetComponent<Character>();
+            Idle();
+        }
+
+        public void Play(CharacterState state, float wait)
+        {
+            StopAllCoroutines();
+
+            SetState(state);
+
+            StartCoroutine(WaitToIdle(wait));
+        }
+
+        System.Collections.IEnumerator WaitToIdle(float time)
+        {
+            yield return new WaitForSeconds(time);
             Idle();
         }
 

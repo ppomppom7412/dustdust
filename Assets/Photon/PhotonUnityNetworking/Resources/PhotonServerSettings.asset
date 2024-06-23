@@ -47,6 +47,7 @@ MonoBehaviour:
   - ReceivedSkill
   - ReceivedNextTurn
   - ReceivedReady
+  - ReceivedMove
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
