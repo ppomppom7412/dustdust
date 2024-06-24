@@ -1,10 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace YellowGreen.ObjectPool
 {
-    //º¹Á¦Ç°
+    //ë³µì œí’ˆ
     [System.Serializable]
     public class OBPObject<T> : MonoBehaviour where T : MonoBehaviour
     {
@@ -23,7 +21,7 @@ namespace YellowGreen.ObjectPool
         }
 
         /// <summary>
-        /// ¿ÀºêÁ§Æ® »ı¼º
+        /// ì˜¤ë¸Œì íŠ¸ ìƒì„±
         /// </summary>
         /// <param name="prefab"></param>
         /// <param name="parent"></param>
@@ -44,7 +42,7 @@ namespace YellowGreen.ObjectPool
             pool = _pool;
         }
 
-        //ºñÈ°¼ºÈ­µÉ ¶§ Ç®·Î µ¹¾Æ°¡±â
+        //ë¹„í™œì„±í™”ë  ë•Œ í’€ë¡œ ëŒì•„ê°€ê¸°
         private void OnDisable()
         {
             if (pool != null)

@@ -1,8 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Singleton;
-
 
 namespace YellowGreen.Popup
 {
@@ -237,10 +235,7 @@ namespace YellowGreen.Popup
                     SetState(popupStack.Peek().setState);
             }
         }
-
         #endregion
-
     }
-
 
 }

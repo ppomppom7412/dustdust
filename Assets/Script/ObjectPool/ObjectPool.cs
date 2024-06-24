@@ -1,10 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace YellowGreen.ObjectPool
 {
-    //º¹Á¦Ç° »ı»ê ¹× °ü¸®ÀÚ
+    //ë³µì œí’ˆ ìƒì‚° ë° ê´€ë¦¬ì
     [System.Serializable]
     public class ObjectPool<T> where T : MonoBehaviour
     {
@@ -14,10 +13,10 @@ namespace YellowGreen.ObjectPool
         public Transform parent;
         public OBPObject<T> prefab;
         public List<OBPObject<T>> pool;
-        public List<int> active; //È°¼ºÈ­¸®½ºÆ®(¿ì¼±¼øÀ§¿¡ µû¸¥)
+        public List<int> active; //í™œì„±í™”ë¦¬ìŠ¤íŠ¸(ìš°ì„ ìˆœìœ„ì— ë”°ë¥¸)
 
         /// <summary>
-        /// ÃÊ±âÈ­
+        /// ì´ˆê¸°í™”
         /// </summary>
         public void Initialize()
         {
@@ -32,7 +31,7 @@ namespace YellowGreen.ObjectPool
         }
 
         /// <summary>
-        /// ¿ÀºêÁ§Æ® Ç®¿¡¼­ ºñÈ°¼ºÈ­µÈ ¿ÀºêÁ§Æ® ºÎ¸£±â
+        /// ì˜¤ë¸Œì íŠ¸ í’€ì—ì„œ ë¹„í™œì„±í™”ëœ ì˜¤ë¸Œì íŠ¸ ë¶€ë¥´ê¸°
         /// </summary>
         /// <returns></returns>
         public OBPObject<T> GetPoolObject()
@@ -40,12 +39,12 @@ namespace YellowGreen.ObjectPool
             if (!isInit)
                 Initialize();
 
-            //Á¦ÇÑ ¾øÀÌ »ı¼º) ¸ğµÎ È°¼ºÈ­ µÆÀ» ¶§
+            //ì œí•œ ì—†ì´ ìƒì„±) ëª¨ë‘ í™œì„±í™” ëì„ ë•Œ
             if ((limitCount < 1 && pool.Count <= active.Count)
-                //Á¦ÇÑ ÀÖ´Â »ı¼º) Á¦ÇÑ°³¼öº¸´Ù Àû°í ¸ğµÎ È°¼ºÈ­ µÆÀ» ¶§
+                //ì œí•œ ìˆëŠ” ìƒì„±) ì œí•œê°œìˆ˜ë³´ë‹¤ ì ê³  ëª¨ë‘ í™œì„±í™” ëì„ ë•Œ
                 || (limitCount > 0 && limitCount >= pool.Count && pool.Count <= active.Count))
             {
-                //»õ·Ó°Ô »ı¼º ÈÄ ¹İÈ¯
+                //ìƒˆë¡­ê²Œ ìƒì„± í›„ ë°˜í™˜
                 OBPObject<T> returnObject = OBPObject<T>.InstantiateObject(prefab, parent);
                 returnObject.SetTargetPool(this);
                 pool.Add(returnObject);
@@ -54,27 +53,27 @@ namespace YellowGreen.ObjectPool
                 returnObject.IsActive = true;
                 return returnObject;
             }
-            //Á¦ÇÑ ÀÖ´Â ÀçÈ°¿ë) Á¦ÇÑ°³¼ö¸¸Å­ »ı»êµÇ¾ú°í ¸ğµÎ È°¼ºÈ­ µÆÀ» ¶§
+            //ì œí•œ ìˆëŠ” ì¬í™œìš©) ì œí•œê°œìˆ˜ë§Œí¼ ìƒì‚°ë˜ì—ˆê³  ëª¨ë‘ í™œì„±í™” ëì„ ë•Œ
             else if (limitCount > 0 && limitCount <= pool.Count && pool.Count <= active.Count)
             {
-                //°¡Àå ¿À·¡µÈ °ÍÀ» ºñÈ°¼ºÈ­ ½ÃÅ²´Ù.
+                //ê°€ì¥ ì˜¤ë˜ëœ ê²ƒì„ ë¹„í™œì„±í™” ì‹œí‚¨ë‹¤.
                 int old = active[0];
                 pool[old].IsActive = false;
 
-                //´Ù½Ã Ãß°¡ÇØ¼­ ¹İÈ¯
+                //ë‹¤ì‹œ ì¶”ê°€í•´ì„œ ë°˜í™˜
                 active.Add(old);
                 pool[old].IsActive = true;
                 return pool[old];
             }
-            //Ç®¿¡ ºñÈ°¼ºÈ­µÈ °ÍÀÌ ÀÖÀ» ¶§
+            //í’€ì— ë¹„í™œì„±í™”ëœ ê²ƒì´ ìˆì„ ë•Œ
             else
             {
                 for (int i = 0; i < pool.Count; ++i)
                 {
-                    //nullÀÌ Ãß°¡µÇ¾î¼­ ²¿ÀÎ ºÎºĞÀÌ ÀÖ´Ù¸é
+                    //nullì´ ì¶”ê°€ë˜ì–´ì„œ ê¼¬ì¸ ë¶€ë¶„ì´ ìˆë‹¤ë©´
                     if (pool[i] == null)
                     {
-                        //±×³É »ı¼ºÇØ¼­ Ãß°¡ÇØ³õÀÚ!
+                        //ê·¸ëƒ¥ ìƒì„±í•´ì„œ ì¶”ê°€í•´ë†“ì!
                         pool[i] = OBPObject<T>.InstantiateObject(prefab, parent);
                     }
 
@@ -88,10 +87,10 @@ namespace YellowGreen.ObjectPool
                 }
             }
 
-            //¸ğµç Á¶°Ç¿¡¼­ Å»ÃâÇÏ¸é ¹®Á¦°¡ ÀÖÀ½
-            //Á¦¾î¿ë ÄÚµå Ãß°¡
+            //ëª¨ë“  ì¡°ê±´ì—ì„œ íƒˆì¶œí•˜ë©´ ë¬¸ì œê°€ ìˆìŒ
+            //ì œì–´ìš© ì½”ë“œ ì¶”ê°€
 
-            //»õ·Ó°Ô »ı¼º ÈÄ ¹İÈ¯
+            //ìƒˆë¡­ê²Œ ìƒì„± í›„ ë°˜í™˜
             OBPObject<T> newObject = OBPObject<T>.InstantiateObject(prefab, parent);
             newObject.SetTargetPool(this);
             pool.Add(newObject);
@@ -102,12 +101,12 @@ namespace YellowGreen.ObjectPool
         }
 
         /// <summary>
-        /// ¿ÀºêÁ§Æ®°¡ ºñÈ°¼ºÈ­½Ã ºÎ¸£´Â ÇÔ¼ö : È°¼ºÈ­ ¸®½ºÆ®¿¡¼­ Áö¿ì±â
+        /// ì˜¤ë¸Œì íŠ¸ê°€ ë¹„í™œì„±í™”ì‹œ ë¶€ë¥´ëŠ” í•¨ìˆ˜ : í™œì„±í™” ë¦¬ìŠ¤íŠ¸ì—ì„œ ì§€ìš°ê¸°
         /// </summary>
         /// <param name="target"></param>
         public void DisableObject(OBPObject<T> target)
         {
-            //µ¿ÀÏÇÑ °ÍÀ» Ã£¾Æ Áö¿öÁÖ±â
+            //ë™ì¼í•œ ê²ƒì„ ì°¾ì•„ ì§€ì›Œì£¼ê¸°
             for (int i = 0; i < pool.Count; ++i)
             {
                 if (active == null) continue;
@@ -121,7 +120,7 @@ namespace YellowGreen.ObjectPool
         }
 
         /// <summary>
-        /// ¸ğµÎ ºñÈ°¼ºÈ­ ½ÃÅ°±â
+        /// ëª¨ë‘ ë¹„í™œì„±í™” ì‹œí‚¤ê¸°
         /// </summary>
         public void DisableAll()
         {

@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Events;
 
 [RequireComponent(typeof(Slider))]
 public class ColorSlider : MonoBehaviour
@@ -18,7 +15,7 @@ public class ColorSlider : MonoBehaviour
         if (slider == null)
             slider = GetComponent<Slider>();
 
-        //°ª º¯È­¿¡ »ö»ó º¯È­ÄÚµå Ãß°¡
+        //ê°’ ë³€í™”ì— ìƒ‰ìƒ ë³€í™”ì½”ë“œ ì¶”ê°€
         if (slider != null)
             slider.onValueChanged.AddListener((value)=> 
             {

@@ -6,9 +6,9 @@ public class PlayerState
 {
     const int maxHp = 9;
     const int maxMn = 4;
-    public int curHp;//Ã¼·Â
-    public int curSd;//ÀÓ½Ã Ã¼·Â
-    public int curMn;//¸¶³ª
+    public int curHp;//ì²´ë ¥
+    public int curSd;//ìž„ì‹œ ì²´ë ¥
+    public int curMn;//ë§ˆë‚˜
 
     public void Init() 
     {
@@ -27,7 +27,7 @@ public class PlayerState
         if (curHp <= 0)
         {
             curHp = 0;
-            //Á×À½À» °ÔÀÓ ¸Å´ÏÀú¿¡°Ô º¸³»±â
+            //ì£½ìŒì„ ê²Œìž„ ë§¤ë‹ˆì €ì—ê²Œ ë³´ë‚´ê¸°
         }
     }
 
@@ -61,6 +61,4 @@ public class PlayerState
             return false;
         }
     }
-
-
 }

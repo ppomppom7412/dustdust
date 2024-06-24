@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Singleton;
-using DG.Tweening;
+using Singleton; //MonoSingleton
+using DG.Tweening; //DOTween
 
 public class CameraController : MonoSingleton<CameraController>
 {

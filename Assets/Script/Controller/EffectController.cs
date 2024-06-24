@@ -1,10 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Singleton; //MonoSingleton
 using AYellowpaper.SerializedCollections; //SerializedDictionary
 using YellowGreen.ObjectPool; //OBPObject, ObjectPool, OBPPart
-using UnityEngine.Events;
+using UnityEngine.Events; //UnityEvent
 
 public class EffectController : MonoSingleton<EffectController>
 {
@@ -17,6 +15,7 @@ public class EffectController : MonoSingleton<EffectController>
 
     private void Update()
     {
+        //임시 테스트 용
         if (Input.GetKeyUp(KeyCode.Tab))
             ShowBGM((SoundEnum)Random.Range(0, 4));
 
@@ -32,20 +31,20 @@ public class EffectController : MonoSingleton<EffectController>
     {
         BGM_Main,
         BGM_Lobby,
-        BGM_Play1,
-        BGM_Play2,
+        BGM_Play1, //일반 플레이
+        BGM_Play2, //체력이 적어진 상태 이후
         UI_Click,
         UI_Close,
         UI_Open,
         Win,
         Lose,
-        Death,//����
+        Death,
         Smoke,
         Jump,
-        Slash,//�ֵθ���
-        Shot,//���
-        Hit, //�±�
-        Eat,
+        Slash,//휘두르기
+        Shot,//쏘기
+        Hit, //맞기
+        Eat,//획득
     }
 
     [NaughtyAttributes.Foldout("Sound Elements")]
@@ -108,7 +107,7 @@ public class EffectController : MonoSingleton<EffectController>
 
     #endregion
 
-    #region Efx 
+    #region efx 
 
     public enum EffectEnum
     {
@@ -140,9 +139,4 @@ public class ClipData
 {
     public int channel;
     public AudioClip clip;
-}
-
-public class BoolUnityEvent : UnityEvent<bool>
-{
-
 }
