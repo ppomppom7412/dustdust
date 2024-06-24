@@ -43,16 +43,20 @@ public class CountDownUI : MonoBehaviour
 
         for (int i = 0; i <= time * 10; ++i)
         {
-            //1ÃÊ¸¶´Ù º¯°æ
+            //1ì´ˆë§ˆë‹¤ ë³€ê²½
             if (i % 10 == 0)
                 SetTimeText(time - (i / 10f));
 
             SetFillValue((i + 0.01f) / (time * 10));
 
+            //5ì´ˆëŒ€ë¡œ ë“¤ì–´ì˜¤ë©´ ìŠ¤í‚µ ë²„íŠ¼ ë‚ ë¦¬ê¸°
+            if (i.Equals(50))
+                UIGameManager.Instance.skipButton.SetActive(false);
+
             yield return wait01f;
         }
 
-        //½Ã°£ÀÌ ´ÙÁö³ª¸é ³Ñ±â±â ½ÇÇà
+        //ì‹œê°„ì´ ë‹¤ì§€ë‚˜ë©´ ë„˜ê¸°ê¸° ì‹¤í–‰
         GameManager.Instance.Action(-1);
     }
 }

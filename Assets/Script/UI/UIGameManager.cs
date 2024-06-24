@@ -1,10 +1,11 @@
 using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 using UnityEngine.UI;
+
 using Singleton;
 using DG.Tweening;
-using NaughtyAttributes;
+using YellowGreen.Popup;
 
 public class UIGameManager : MonoSingleton<UIGameManager>
 {
@@ -30,6 +31,10 @@ public class UIGameManager : MonoSingleton<UIGameManager>
     public GameObject myTurnUI;
     public GameObject hurtAnimUI;
     public GameObject[] actIcons;
+
+    [Header("Ingame Popup")]
+    public GameObject ingameSettingUI;
+    public GameObject askSkipUI;
 
     [Header("Loading UI")]
     public GameObject LoadingPanel;
@@ -136,14 +141,33 @@ public class UIGameManager : MonoSingleton<UIGameManager>
         connectText.text = message;
     }
 
+    [NaughtyAttributes.Button]
     /// <summary>
-    /// 닉네임 표기
+    /// 게임 설정창 켜기
     /// </summary>
-    /// <param name="nickstring"></param>
-    public void SetNicknameText(string nickstring)
+    public void OpenGameSetting() 
     {
-        if (nicknameText == null) return;
-        nicknameText.text = nickstring;
+        ingameSettingUI.SetActive(true);
+        PopupManager.Instance.AddPop((isExitGame) => {
+            ingameSettingUI.SetActive(false);
+
+            if (isExitGame) //게임 도중 나가기
+                PunManager.Instance.LeaveRoom();
+        }, PopupManager.PopState.Idle);
+    }
+
+    /// <summary>
+    /// 스킵할건지 묻는 창 켜기
+    /// </summary>
+    public void OpenAskSkip() 
+    {
+        askSkipUI.SetActive(true);
+        PopupManager.Instance.AddPop((isSkip) => {
+            askSkipUI.SetActive(false);
+
+            if (isSkip) //게임 도중 나가기
+                GameManager.Instance.Action(-1);
+        }, PopupManager.PopState.Idle);
     }
 
     #endregion
